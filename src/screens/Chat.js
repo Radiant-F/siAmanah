@@ -1,19 +1,19 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet, Image, ScrollView} from 'react-native';
+import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
-export class Transaction extends Component {
+export class Chat extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>
           <Image
-            source={require('../assets/transaksi.png')}
+            source={require('../assets/chat-bubble.png')}
             style={styles.headerIcon}
           />
-          <Text style={styles.headerText}>Transaksi</Text>
+          <Text style={styles.headerText}>Pesan</Text>
         </View>
         <ScrollView>
-          <Text> Transaksi </Text>
+          <Text> Kontak </Text>
         </ScrollView>
       </View>
     );
@@ -35,10 +35,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   headerIcon: {
-    width: 30,
-    height: 30,
+    width: 25,
+    height: 25,
     tintColor: 'white',
   },
 });
 
-export default Transaction;
+export default Chat;

@@ -20,31 +20,36 @@ export class Login extends Component {
     };
   }
 
+  componentDidMount() {
+    AsyncStorage.getItem('token')
+      .then((value) => {
+        if (value !== null) {
+          this.props.navigation.replace('BottomTab');
+        }
+      })
+      .catch((err) => console.log(err));
+  }
+
   login() {
     if (this.state.email != '' && this.state.password != '') {
       const {email, password} = this.state;
       const kirimData = {email: email, password: password};
-      var formBody = [];
-      for (var key in kirimData) {
-        var encodedKey = encodeURIComponent(key);
-        var encodedValue = encodeURIComponent(kirimData[key]);
-        formBody.push(encodedKey + '=' + encodedValue);
-      }
-      formBody = formBody.join('&');
-      fetch('http://restful-api-laravel-7.herokuapp.com/api/login', {
+      fetch('https://si--amanah.herokuapp.com/api/login', {
         method: 'POST',
-        body: formBody,
+        body: JSON.stringify(kirimData),
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          'Content-Type': 'application/json',
         },
       })
         .then((response) => response.json())
         .then((responseJSON) => {
           console.log(responseJSON);
+
           const {token} = responseJSON;
           if (token) {
             AsyncStorage.setItem('token', token);
-            this.props.navigation.navigate('BottomTab');
+            console.log(token);
+            this.props.navigation.replace('BottomTab', {screen: 'Home'});
           } else {
             alert('Pastikan data terisi dengan benar.');
           }
@@ -101,7 +106,8 @@ export class Login extends Component {
               </TouchableOpacity>
             </View>
             <TouchableOpacity
-              onPress={() => this.props.navigation.replace('BottomTab')}>
+              onChangeText={(input) => this.setState({email: input})}
+              onPress={() => this.login()}>
               <View style={styles.viewTextLogin}>
                 <Text style={styles.textLogin}>Masuk</Text>
               </View>

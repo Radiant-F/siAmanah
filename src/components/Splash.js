@@ -8,6 +8,7 @@ export class Splash extends Component {
       AsyncStorage.getItem('token')
         .then((value) => {
           if (value !== null) {
+            console.log(value + '. Token tersedia. Menuju HomePage');
             this.props.navigation.replace('BottomTab');
           } else {
             console.log('Tidak ada token. Menuju onboard.');

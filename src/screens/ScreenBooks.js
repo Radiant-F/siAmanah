@@ -1,19 +1,19 @@
 import React, {Component} from 'react';
-import {Text, View, StyleSheet, Image, ScrollView} from 'react-native';
+import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
-export class Transaction extends Component {
+export class ScreenBooks extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>
           <Image
-            source={require('../assets/transaksi.png')}
+            source={require('../assets/buku.png')}
             style={styles.headerIcon}
           />
-          <Text style={styles.headerText}>Transaksi</Text>
+          <Text style={styles.headerText}>Buku</Text>
         </View>
         <ScrollView>
-          <Text> Transaksi </Text>
+          <Text> Kontak </Text>
         </ScrollView>
       </View>
     );
@@ -22,7 +22,7 @@ export class Transaction extends Component {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#4EC5F1',
+    backgroundColor: '#1fbcff',
     height: 60,
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -35,10 +35,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   headerIcon: {
-    width: 30,
-    height: 30,
+    width: 25,
+    height: 25,
     tintColor: 'white',
   },
 });
 
-export default Transaction;
+export default ScreenBooks;

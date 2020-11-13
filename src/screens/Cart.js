@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 
-export class Whishlist extends Component {
+export class Cart extends Component {
   render() {
     return (
       <View>
-        <Text> Daftar favorit </Text>
+        <Text> Cart </Text>
       </View>
     );
   }
 }
 
-export default Whishlist;
+export default Cart;

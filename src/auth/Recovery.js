@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-community/async-storage';
 import React, {Component} from 'react';
 import {
   ActivityIndicator,
@@ -17,6 +16,14 @@ export class Recovery extends Component {
     this.state = {
       email: '',
     };
+  }
+
+  send() {
+    if (this.state.email != '') {
+      alert('Pesan terkirim.');
+    } else {
+      alert('Jangan kosong.');
+    }
   }
 
   render() {
@@ -50,7 +57,7 @@ export class Recovery extends Component {
                 <Text style={styles.subText}>Register</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => alert('Pesan terkirim.')}>
+            <TouchableOpacity onPress={() => this.send()}>
               <View style={styles.viewTextLogin}>
                 <Text style={styles.textLogin}>Kirim Pesan</Text>
               </View>

@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import React, {Component} from 'react';
 import {
-  ActivityIndicator,
   Image,
   ImageBackground,
   StyleSheet,
@@ -17,44 +16,39 @@ export class Register extends Component {
     this.state = {
       name: '',
       email: '',
-      confirmEmail: '',
       password: '',
-      token: '',
+      confirmPass: '',
     };
   }
 
   Register() {
-    const {name, email, password, ulangiPassword} = this.state;
-
+    const {name, email, password, confirmPass} = this.state;
     var dataToSend = {
       name: name,
       email: email,
       password: password,
-      password_confirmation: ulangiPassword,
+      password_confirmation: confirmPass,
     };
-    var formBody = [];
-    for (var key in dataToSend) {
-      var encodedKey = encodeURIComponent(key);
-      var encodedValue = encodeURIComponent(dataToSend[key]);
-      formBody.push(encodedKey + '=' + encodedValue);
-    }
-    formBody = formBody.join('&');
-    fetch('http://restful-api-laravel-7.herokuapp.com/api/register', {
+
+    fetch('https://si--amanah.herokuapp.com/api/register', {
       method: 'POST',
-      body: formBody,
+      body: JSON.stringify(dataToSend),
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Content-Type': 'application/json',
       },
     })
       .then((response) => response.json())
       .then((responseJson) => {
         console.log(responseJson);
         const {token} = responseJson;
-        if (token) {
-          alert('Success');
-          this.props.navigation.goBack();
+        if (token != null) {
+          AsyncStorage.setItem('token', token);
+          console.log(token);
+          alert('Registrasi berhasil!');
+          this.props.navigation.replace('BottomTab');
         } else {
-          alert('Pastikan formulir terisi dengan benar');
+          console.log(token + '. token tidak ada.');
+          alert('Pastikan formulir terisi dengan benar.');
         }
       })
       .catch((error) => {
@@ -78,7 +72,7 @@ export class Register extends Component {
               <TextInput
                 style={{flex: 1}}
                 placeholder="Nama"
-                onChangeText={(input) => this.setState({email: input})}
+                onChangeText={(input) => this.setState({name: input})}
               />
             </View>
             <View style={styles.viewInput}>
@@ -94,17 +88,6 @@ export class Register extends Component {
             </View>
             <View style={styles.viewInput}>
               <Image
-                source={require('../assets/black-envelope-email-symbol.png')}
-                style={styles.icon}
-              />
-              <TextInput
-                style={{flex: 1}}
-                placeholder="Konfirmasi Email"
-                onChangeText={(input) => this.setState({email: input})}
-              />
-            </View>
-            <View style={styles.viewInput}>
-              <Image
                 source={require('../assets/locked-padlock.png')}
                 style={styles.icon}
               />
@@ -115,6 +98,18 @@ export class Register extends Component {
                 secureTextEntry={true}
               />
             </View>
+            <View style={styles.viewInput}>
+              <Image
+                source={require('../assets/locked-padlock.png')}
+                style={styles.icon}
+              />
+              <TextInput
+                style={{flex: 1}}
+                placeholder="Konfirmasi Kata Sandi"
+                onChangeText={(input) => this.setState({confirmPass: input})}
+                secureTextEntry={true}
+              />
+            </View>
             <TouchableOpacity
               style={{
                 width: 300,
@@ -122,8 +117,7 @@ export class Register extends Component {
               onPress={() => this.props.navigation.replace('Login')}>
               <Text style={styles.subText}>Login</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => this.props.navigation.replace('BottomTab')}>
+            <TouchableOpacity onPress={() => this.Register()}>
               <View style={styles.viewTextLogin}>
                 <Text style={styles.textLogin}>Daftar</Text>
               </View>

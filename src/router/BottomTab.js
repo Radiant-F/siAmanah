@@ -5,17 +5,15 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 // SCREENS
 import HomePage from '../screens/HomePage';
 import Profile from '../screens/Profile';
-import Whishlist from '../screens/Whishlist';
 import Transaction from '../screens/Transaction';
+import Chat from '../screens/Chat';
 
 const Tab = createMaterialBottomTabNavigator();
 
 const BottomTab = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
-      backBehavior={'initialRoute'}
-      activeColor="blue"
+      backBehavior="Home"
       screenOptions={{
         tabBarColor: '#4EC5F1',
       }}>
@@ -28,13 +26,12 @@ const BottomTab = () => {
         }}
       />
       <Tab.Screen
-        name="Whishlist"
-        component={Whishlist}
+        name="Chat"
+        component={Chat}
         options={{
-          tabBarColor: 'red',
-          tabBarLabel: 'Favorit',
+          tabBarLabel: 'Pesan',
           tabBarIcon: ({color}) => (
-            <Icon name="heart-outline" color={color} size={25} />
+            <Icon name="forum" color={color} size={25} />
           ),
         }}
       />
@@ -42,7 +39,6 @@ const BottomTab = () => {
         name="Transaction"
         component={Transaction}
         options={{
-          tabBarColor: 'green',
           tabBarLabel: 'Transaksi',
           tabBarIcon: ({color}) => (
             <Icon name="cart-outline" color={color} size={25} />
