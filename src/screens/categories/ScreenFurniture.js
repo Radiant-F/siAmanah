@@ -1,16 +1,16 @@
 import React, {Component} from 'react';
 import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
-export class ScreenElectronics extends Component {
+class ScreenFurniture extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>
           <Image
-            source={require('../assets/electronik.png')}
+            source={require('../../assets/furnitur.png')}
             style={styles.headerIcon}
           />
-          <Text style={styles.headerText}>Elektronik</Text>
+          <Text style={styles.headerText}>Furnitur</Text>
         </View>
         <ScrollView>
           <Text> Kontak </Text>
@@ -22,7 +22,7 @@ export class ScreenElectronics extends Component {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#ff1f1f',
+    backgroundColor: '#0080db',
     height: 60,
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScreenElectronics;
+export default ScreenFurniture;

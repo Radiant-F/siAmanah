@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Text, View, StyleSheet, Image, TouchableOpacity} from 'react-native';
 
-export class Products extends Component {
+class Products extends Component {
   renderProducts = (products) => {
     console.log(products);
     return products.map((item, index) => {

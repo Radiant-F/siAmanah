@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import Swiper from 'react-native-swiper';
 import AsyncStorage from '@react-native-community/async-storage';
+import {product} from '../components/Data';
+import LottieView from 'lottie-react-native';
 import {
   Image,
   ScrollView,
@@ -11,42 +13,36 @@ import {
   View,
   FlatList,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 
-export class HomePage extends Component {
+class HomePage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      isLoading: true,
-      dataSource: [''],
+      isLoading: false,
+      dataSource: [],
       token: '',
+      user: {},
+      is_first: '0',
     };
   }
 
   componentDidMount() {
-    fetch('http://jsonplaceholder.typicode.com/posts')
-      .then((response) => response.json())
-      .then((responseJson) => {
-        JSON.stringify(responseJson);
-        this.setState({
-          isLoading: false,
-          dataSource: responseJson,
-        });
-      });
-    //   .catch((err) => console.log(err));
-    // AsyncStorage.getItem('token')
-    //   .then((token) => {
-    //     if (token !== null) {
-    //       this.setState({token: token});
-    //     } else {
-    //       alert('Token hilang!');
-    //     }
-    //   })
-    //   .then(() => this.getItem());
-    // }
+    AsyncStorage.getItem('token')
+      .then((token) => {
+        if (token !== null) {
+          this.setState({token: token});
+          this.getItem();
+        } else {
+          console.log('Tidak ada token.');
+        }
+      })
+      .catch((err) => console.log(err));
   }
 
   getItem() {
+    this.setState({isLoading: true});
     fetch(`https://si--amanah.herokuapp.com/api/product`, {
       method: 'GET',
       headers: {
@@ -57,69 +53,56 @@ export class HomePage extends Component {
       .then((response) => response.json())
       .then((responseJson) => {
         JSON.stringify(responseJson);
-        if (responseJson != null) {
-          console.log(responseJson);
+        if (responseJson != '') {
           this.setState({
             isLoading: false,
-            dataSource: responseJson,
+            dataSource: responseJson[0].data,
           });
+          console.log(this.state.dataSource);
+          console.log('Barang terbaru: ' + responseJson[0].data[0].name);
         } else {
           alert('error');
+          this.setState({isLoading: false});
           console.log(responseJson);
         }
       })
       .catch((err) => {
+        this.setState({isLoading: false});
         console.log(err);
       });
   }
 
-  _renderItem = ({item, index}) => {
-    return (
-      <TouchableOpacity
-        style={styles.items}
-        onPress={() =>
-          this.props.navigation.navigate('Detail', {
-            id: item.id,
-          })
-        }>
-        <Image
-          source={require('../assets/elektronikHeadset.jpg')}
-          style={styles.image}
-        />
-        <View style={styles.viewTextProduct}>
-          <Text style={styles.textProduct}>{item.title}</Text>
-          <Text style={styles.textPrice}>Rp.50.000,-</Text>
-          <Text style={styles.textDesc}>{item.body}</Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
   render() {
     return (
-      <View>
+      <View style={{flex: 1}}>
         <View style={styles.headerView}>
-          <Text style={styles.headerText}>
-            Selamat datang, {this.state.dataSource[0].id}.
-          </Text>
-          <TouchableOpacity
-            onPress={() => this.props.navigation.navigate('Transaction')}>
+          <ImageBackground
+            source={require('../assets/headerHome.png')}
+            style={styles.headerBg}>
             <Image
-              source={require('../assets/shopping-cart.png')}
-              style={styles.headerIcon}
+              source={require('../assets/logoTokoHeader.png')}
+              style={styles.headerIconMain}
             />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => this.props.navigation.navigate('Favorite')}>
-            <Image
-              source={require('../assets/favorite-heart-button.png')}
-              style={styles.headerIcon}
-            />
-          </TouchableOpacity>
+            <Text style={styles.headerText}>Toko siAmanah</Text>
+            <TouchableOpacity
+              onPress={() => this.props.navigation.navigate('Transaction')}>
+              <Image
+                source={require('../assets/shopping-cart.png')}
+                style={styles.headerIcon}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => this.props.navigation.navigate('Favorite')}>
+              <Image
+                source={require('../assets/favorite-heart-button.png')}
+                style={styles.headerIcon}
+              />
+            </TouchableOpacity>
+          </ImageBackground>
         </View>
         <ScrollView>
           <View style={{flex: 1, marginBottom: 10}}>
-            <Swiper height={250} autoplay={true}>
+            <Swiper height={200} autoplay={true}>
               <TouchableOpacity style={styles.slide}>
                 <Image
                   source={require('../assets/swiperMasjid.jpg')}
@@ -160,17 +143,7 @@ export class HomePage extends Component {
                 />
                 <Text style={styles.textCategory}>Buku</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.touchCategory}
-                onPress={() => this.props.navigation.navigate('Furnitures')}>
-                <Image
-                  source={require('../assets/furnitur.png')}
-                  style={styles.viewCategoryIcon}
-                />
-                <Text style={styles.textCategory}>Furnitur</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={styles.subViewCategory2}>
+
               <TouchableOpacity
                 style={styles.touchCategory}
                 onPress={() => this.props.navigation.navigate('Clothes')}>
@@ -179,24 +152,6 @@ export class HomePage extends Component {
                   style={styles.viewCategoryIcon}
                 />
                 <Text style={styles.textCategory}>Pakaian</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.touchCategory}
-                onPress={() => this.props.navigation.navigate('Foods')}>
-                <Image
-                  source={require('../assets/makanan.png')}
-                  style={styles.viewCategoryIcon}
-                />
-                <Text style={styles.textCategory}>Makanan</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.touchCategory}
-                onPress={() => this.props.navigation.navigate('Antique')}>
-                <Image
-                  source={require('../assets/antik.png')}
-                  style={styles.viewCategoryIcon}
-                />
-                <Text style={styles.textCategory}>Antik</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -213,49 +168,50 @@ export class HomePage extends Component {
               selectionColor="#4EC5F1"
             />
           </View>
-          {/* ============ FLATLIST API ============ */}
+          {/* ============ MAP API ============ */}
           {this.state.isLoading ? (
-            <View>
-              <ActivityIndicator size="large" color />
+            <View style={styles.viewLoading}>
+              <LottieView
+                source={require('../assets/21249-shopping-cart.json')}
+                autoPlay={true}
+                style={{width: 170}}
+              />
             </View>
           ) : (
-            <FlatList
-              numColumns={2}
-              data={this.state.dataSource}
-              renderItem={this._renderItem}
-              keyExtractor={(item, index) => index.toString()}
-            />
-          )}
-          {/* ============ FLATLIST API ============ */}
-          {/* ============ MAP API ============ */}
-          {/* <View>
-            {this.state.isLoading ? (
-              <View>
-                <ActivityIndicator size="large" color="red" />
-              </View>
-            ) : (
-              <View style={styles.items}>
-                {this.state.dataSource.map((value, index) => (
-                  <View>
-                    <TouchableOpacity key={index}>
-                      <Image source={value.photo} style={styles.image} />
-                      <View style={styles.viewTextItems}>
-                        <Text style={styles.textName}>{value.task}</Text>
-                        <Text style={styles.textDesc}>{value.desc}</Text>
-                      </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity key={index}>
-                      <Image source={value.photo} style={styles.image} />
-                      <View style={styles.viewTextItems}>
-                        <Text style={styles.textName}>{value.task}</Text>
-                        <Text style={styles.textDesc}>{value.desc}</Text>
-                      </View>
+            <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
+              {this.state.dataSource.map((value, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.items}
+                  onPress={() =>
+                    this.props.navigation.replace('Detail', {
+                      item: value,
+                    })
+                  }>
+                  <Image source={{uri: value.image}} style={styles.image} />
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <View style={{flex: 1}}>
+                      <Text numberOfLines={1} style={styles.textProduct}>
+                        {value.name}
+                      </Text>
+                      <Text style={styles.textPrice}>Rp.{value.price},-</Text>
+                    </View>
+                    <TouchableOpacity style={{alignSelf: 'flex-end'}}>
+                      <Image
+                        source={require('../assets/favorite-heart-outline-button.png')}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          alignSelf: 'flex-end',
+                          tintColor: 'tomato',
+                        }}
+                      />
                     </TouchableOpacity>
                   </View>
-                ))}
-              </View>
-            )}
-          </View> */}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
           {/* ============ MAP API ============ */}
         </ScrollView>
       </View>
@@ -265,12 +221,18 @@ export class HomePage extends Component {
 
 const styles = StyleSheet.create({
   headerView: {
-    flexDirection: 'row',
-    width: '100%',
-    paddingHorizontal: 15,
-    height: 60,
+    // width: '100%',
     backgroundColor: '#4EC5F1',
     alignItems: 'center',
+    // justifyContent: 'center',
+    // height: 60,
+  },
+  headerBg: {
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 60,
+    resizeMode: 'center',
   },
   viewSearch: {
     backgroundColor: '#fff',
@@ -292,6 +254,12 @@ const styles = StyleSheet.create({
     height: 25,
     tintColor: 'white',
     marginLeft: 15,
+  },
+  headerIconMain: {
+    width: 35,
+    height: 35,
+    marginRight: 15,
+    tintColor: 'white',
   },
   headerText: {
     color: 'white',
@@ -368,32 +336,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   items: {
+    alignSelf: 'center',
     padding: 10,
     margin: 5,
     backgroundColor: '#fff',
     borderRadius: 5,
-    marginBottom: 10,
     elevation: 1,
-    width: '47.5%',
-    alignItems: 'center',
+    width: '47%',
   },
   image: {
-    width: 180,
-    height: 180,
+    width: 130,
+    height: 130,
     borderRadius: 5,
+    alignSelf: 'center',
   },
   viewTextProduct: {
     alignSelf: 'flex-start',
   },
   textProduct: {
-    marginVertical: 5,
     fontSize: 20,
     fontWeight: 'bold',
+    // borderTopWidth: 1,
+    // borderTopColor: 'black',
+    paddingTop: 10,
+    // flex: 1,
   },
   textPrice: {
     color: '#22a800',
+    fontWeight: 'bold',
   },
   textDesc: {},
+  viewLoading: {
+    width: '100%',
+    backgroundColor: 'white',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 10,
+    alignSelf: 'center',
+    margin: 10,
+  },
 });
 
 export default HomePage;

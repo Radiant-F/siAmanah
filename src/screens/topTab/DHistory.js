@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 
-class Favorite extends Component {
+class History extends Component {
   render() {
     return (
       <View>
-        <Text> Daftar favorit </Text>
+        <Text> Histori </Text>
       </View>
     );
   }
 }
 
-export default Favorite;
+export default History;

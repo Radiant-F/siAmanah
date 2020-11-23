@@ -7,8 +7,8 @@ class Onboard extends Component {
   render() {
     return (
       <Onboarding
-        onSkip={() => this.props.navigation.replace('BottomTab')}
-        onDone={() => this.props.navigation.replace('BottomTab')}
+        onSkip={() => this.props.navigation.replace('Login')}
+        onDone={() => this.props.navigation.replace('Login')}
         nextLabel="Lanjut"
         skipLabel="Lewati"
         bottomBarHighlight={false}

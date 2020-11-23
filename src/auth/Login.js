@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import React, {Component} from 'react';
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   StyleSheet,
@@ -9,14 +10,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import LottieView from 'lottie-react-native';
 
-export class Login extends Component {
+class Login extends Component {
   constructor() {
     super();
     this.state = {
       email: '',
       password: '',
       token: '',
+      loading: false,
     };
   }
 
@@ -34,7 +37,8 @@ export class Login extends Component {
     if (this.state.email != '' && this.state.password != '') {
       const {email, password} = this.state;
       const kirimData = {email: email, password: password};
-      fetch('https://si--amanah.herokuapp.com/api/login', {
+      this.setState({loading: true});
+      fetch('http://si--amanah.herokuapp.com/api/login', {
         method: 'POST',
         body: JSON.stringify(kirimData),
         headers: {
@@ -44,21 +48,22 @@ export class Login extends Component {
         .then((response) => response.json())
         .then((responseJSON) => {
           console.log(responseJSON);
-
           const {token} = responseJSON;
           if (token) {
             AsyncStorage.setItem('token', token);
-            console.log(token);
+            this.setState({loading: false});
             this.props.navigation.replace('BottomTab', {screen: 'Home'});
           } else {
+            this.setState({loading: false});
             alert('Pastikan data terisi dengan benar.');
           }
         })
         .catch((err) => {
+          this.setState({loading: false});
           alert('Terjadi kesalahan. ' + err);
         });
     } else {
-      alert('Harap diisi.'); // boleh ganti sama modal. keren tuh.
+      alert('Harap diisi.');
     }
   }
 
@@ -76,6 +81,7 @@ export class Login extends Component {
                 style={styles.icon}
               />
               <TextInput
+                keyboardType={'email-address'}
                 style={{flex: 1}}
                 placeholder="Email"
                 onChangeText={(input) => this.setState({email: input})}
@@ -96,7 +102,7 @@ export class Login extends Component {
             <View style={styles.textRegister}>
               <TouchableOpacity
                 style={{flexDirection: 'row'}}
-                onPress={() => this.props.navigation.navigate('Recovery')}>
+                onPress={() => this.props.navigation.replace('Recovery')}>
                 <Text style={styles.subText}>Lupa Sandi?</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -105,12 +111,18 @@ export class Login extends Component {
                 <Text style={styles.subText}>Register</Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity
-              onChangeText={(input) => this.setState({email: input})}
-              onPress={() => this.login()}>
-              <View style={styles.viewTextLogin}>
-                <Text style={styles.textLogin}>Masuk</Text>
-              </View>
+            <TouchableOpacity onPress={() => this.login()}>
+              {this.state.loading ? (
+                <LottieView
+                  source={require('../assets/8205-loading-animation.json')}
+                  autoPlay={true}
+                  style={{width: 60, height: 60}}
+                />
+              ) : (
+                <View style={styles.viewTextLogin}>
+                  <Text style={styles.textLogin}>Masuk</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -127,7 +139,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   viewLogin: {
-    width: 380,
+    width: '95%',
     backgroundColor: '#ffffff',
     elevation: 10,
     borderRadius: 10,
@@ -172,8 +184,8 @@ const styles = StyleSheet.create({
     color: '#8f8f8f',
   },
   viewTextLogin: {
-    width: 150,
-    height: 40,
+    width: 170,
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#4EC5F1',
@@ -181,6 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   textLogin: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
     textShadowRadius: 1,

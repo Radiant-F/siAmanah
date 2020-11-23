@@ -1,16 +1,16 @@
 import React, {Component} from 'react';
 import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
-export class ScreenClothes extends Component {
+class ScreenAntique extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>
           <Image
-            source={require('../assets//pakaian.png')}
+            source={require('../../assets/antik.png')}
             style={styles.headerIcon}
           />
-          <Text style={styles.headerText}>Pakaian</Text>
+          <Text style={styles.headerText}>Antik</Text>
         </View>
         <ScrollView>
           <Text> Kontak </Text>
@@ -22,7 +22,7 @@ export class ScreenClothes extends Component {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#bd2eff',
+    backgroundColor: '#e07f00',
     height: 60,
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScreenClothes;
+export default ScreenAntique;

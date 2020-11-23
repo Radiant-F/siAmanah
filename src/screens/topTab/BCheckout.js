@@ -1,14 +1,14 @@
 import React, {Component} from 'react';
 import {Text, View} from 'react-native';
 
-export class Cart extends Component {
+class Checkout extends Component {
   render() {
     return (
       <View>
-        <Text> Cart </Text>
+        <Text> Checkout </Text>
       </View>
     );
   }
 }
 
-export default Cart;
+export default Checkout;

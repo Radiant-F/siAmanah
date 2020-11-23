@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 
-export class Recovery extends Component {
+class Recovery extends Component {
   constructor() {
     super();
     this.state = {

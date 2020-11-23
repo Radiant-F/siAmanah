@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import React, {Component} from 'react';
 import {View, Image, StyleSheet, ImageBackground} from 'react-native';
 
-export class Splash extends Component {
+class Splash extends Component {
   componentDidMount() {
     setTimeout(() => {
       AsyncStorage.getItem('token')

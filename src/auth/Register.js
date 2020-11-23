@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import React, {Component} from 'react';
+import LottieView from 'lottie-react-native';
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   StyleSheet,
@@ -10,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-export class Register extends Component {
+class Register extends Component {
   constructor() {
     super();
     this.state = {
@@ -18,6 +20,7 @@ export class Register extends Component {
       email: '',
       password: '',
       confirmPass: '',
+      loading: false,
     };
   }
 
@@ -29,8 +32,8 @@ export class Register extends Component {
       password: password,
       password_confirmation: confirmPass,
     };
-
-    fetch('https://si--amanah.herokuapp.com/api/register', {
+    this.setState({loading: true});
+    fetch('http://si--amanah.herokuapp.com/api/register', {
       method: 'POST',
       body: JSON.stringify(dataToSend),
       headers: {
@@ -44,14 +47,17 @@ export class Register extends Component {
         if (token != null) {
           AsyncStorage.setItem('token', token);
           console.log(token);
+          this.setState({loading: false});
           alert('Registrasi berhasil!');
           this.props.navigation.replace('BottomTab');
         } else {
           console.log(token + '. token tidak ada.');
+          this.setState({loading: false});
           alert('Pastikan formulir terisi dengan benar.');
         }
       })
       .catch((error) => {
+        this.setState({loading: false});
         alert('Terjadi kesalahan. ' + error);
       });
   }
@@ -81,6 +87,7 @@ export class Register extends Component {
                 style={styles.icon}
               />
               <TextInput
+                keyboardType={'email-address'}
                 style={{flex: 1}}
                 placeholder="Email"
                 onChangeText={(input) => this.setState({email: input})}
@@ -118,9 +125,17 @@ export class Register extends Component {
               <Text style={styles.subText}>Login</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.Register()}>
-              <View style={styles.viewTextLogin}>
-                <Text style={styles.textLogin}>Daftar</Text>
-              </View>
+              {this.state.loading ? (
+                <LottieView
+                  source={require('../assets/8205-loading-animation.json')}
+                  autoPlay={true}
+                  style={{width: 60, height: 60}}
+                />
+              ) : (
+                <View style={styles.viewTextLogin}>
+                  <Text style={styles.textLogin}>Daftar</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </ImageBackground>
@@ -137,7 +152,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   viewLogin: {
-    width: 380,
+    width: '95%',
     backgroundColor: '#ffffff',
     elevation: 10,
     borderRadius: 10,
@@ -182,8 +197,8 @@ const styles = StyleSheet.create({
     color: '#8f8f8f',
   },
   viewTextLogin: {
-    width: 150,
-    height: 40,
+    width: 160,
+    height: 50,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#4EC5F1',
@@ -191,6 +206,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   textLogin: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'white',
     textShadowRadius: 1,

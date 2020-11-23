@@ -9,16 +9,22 @@ import BottomTab from '../router/BottomTab';
 import Recovery from '../auth/Recovery';
 import Onboard from '../components/Onboard';
 import Splash from '../components/Splash';
-import Cart from '../screens/Cart';
 import Chat from '../screens/Chat';
 import Favorite from '../screens/Favorite';
-import ScreenAntique from '../screens/ScreenAntique';
-import ScreenBooks from '../screens/ScreenBooks';
-import ScreenClothes from '../screens/ScreenClothes';
-import ScreenElektronics from '../screens/ScreenElektronics';
-import ScreenFoods from '../screens/ScreenFoods';
-import ScreenFurniture from '../screens/ScreenFurniture';
-import DetailProduct from '../screens/DetailProduct';
+import ScreenAntique from '../screens/categories/ScreenAntique';
+import ScreenBooks from '../screens/categories/ScreenBooks';
+import ScreenClothes from '../screens/categories/ScreenClothes';
+import ScreenElektronics from '../screens/categories/ScreenElektronics';
+import ScreenFoods from '../screens/categories/ScreenFoods';
+import ScreenFurniture from '../screens/categories/ScreenFurniture';
+import DetailProduct from '../screens/ProductDetail';
+import OpenStore from '../screens/OpenStore';
+import ProfileEdit from '../screens/ProfileEdit';
+import AddProduct from '../screens/ProductAdd';
+import EditProoduct from '../screens/ProductEdit';
+import PesananPenjual from '../screens/PesananPenjual';
+import ChatScreen from '../screens/ChatScreen';
+import Nota from '../screens/Nota';
 
 const Stack = createStackNavigator();
 
@@ -32,7 +38,6 @@ const Navigator = () => {
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Recovery" component={Recovery} />
         <Stack.Screen name="BottomTab" component={BottomTab} />
-        <Stack.Screen name="Cart" component={Cart} />
         <Stack.Screen name="Chat" component={Chat} />
         <Stack.Screen name="Favorite" component={Favorite} />
         <Stack.Screen name="Antique" component={ScreenAntique} />
@@ -42,6 +47,13 @@ const Navigator = () => {
         <Stack.Screen name="Foods" component={ScreenFoods} />
         <Stack.Screen name="Furnitures" component={ScreenFurniture} />
         <Stack.Screen name="Detail" component={DetailProduct} />
+        <Stack.Screen name="OpenStore" component={OpenStore} />
+        <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
+        <Stack.Screen name="AddProduct" component={AddProduct} />
+        <Stack.Screen name="EditProduct" component={EditProoduct} />
+        <Stack.Screen name="PesananPenjual" component={PesananPenjual} />
+        <Stack.Screen name="ChatScreen" component={ChatScreen} />
+        <Stack.Screen name="Nota" component={Nota} />
       </Stack.Navigator>
     </NavigationContainer>
   );

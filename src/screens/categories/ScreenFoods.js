@@ -1,16 +1,16 @@
 import React, {Component} from 'react';
 import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
 
-export class ScreenFurniture extends Component {
+class ScreenFoods extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>
           <Image
-            source={require('../assets/furnitur.png')}
+            source={require('../../assets/makanan.png')}
             style={styles.headerIcon}
           />
-          <Text style={styles.headerText}>Furnitur</Text>
+          <Text style={styles.headerText}>Makanan</Text>
         </View>
         <ScrollView>
           <Text> Kontak </Text>
@@ -22,7 +22,7 @@ export class ScreenFurniture extends Component {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#0080db',
+    backgroundColor: '#ff961f',
     height: 60,
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ScreenFurniture;
+export default ScreenFoods;

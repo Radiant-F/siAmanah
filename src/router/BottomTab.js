@@ -13,7 +13,7 @@ const Tab = createMaterialBottomTabNavigator();
 const BottomTab = () => {
   return (
     <Tab.Navigator
-      backBehavior="Home"
+      // backBehavior="Home"
       screenOptions={{
         tabBarColor: '#4EC5F1',
       }}>
