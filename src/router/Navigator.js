@@ -25,6 +25,7 @@ import EditProoduct from '../screens/ProductEdit';
 import PesananPenjual from '../screens/PesananPenjual';
 import ChatScreen from '../screens/ChatScreen';
 import Nota from '../screens/Nota';
+import DetailOrder from '../screens/topTab/BOrderDetail';
 
 const Stack = createStackNavigator();
 
@@ -54,6 +55,7 @@ const Navigator = () => {
         <Stack.Screen name="PesananPenjual" component={PesananPenjual} />
         <Stack.Screen name="ChatScreen" component={ChatScreen} />
         <Stack.Screen name="Nota" component={Nota} />
+        <Stack.Screen name="OrderDetail" component={DetailOrder} />
       </Stack.Navigator>
     </NavigationContainer>
   );

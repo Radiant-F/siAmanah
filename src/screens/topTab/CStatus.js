@@ -19,7 +19,6 @@ export default class CStatus extends Component {
     this.state = {
       token: '',
       data: [],
-      responseJson: [],
       image: '',
       photo: '',
       amount: '',
@@ -55,21 +54,20 @@ export default class CStatus extends Component {
       .then((response) => response.json())
       .then((responseJson) => {
         JSON.stringify(responseJson);
-        // console.log(responseJson);
-        if (responseJson.data != null || '') {
+        if (responseJson.data != '') {
           this.setState({
             loading: false,
             data: responseJson.data,
           });
-          console.log(this.state.data);
+          console.log('Status: ' + this.state.data);
         } else {
           this.setState({loading: false});
-          console.log(this.state.data);
+          console.log('Status: ' + this.state.data);
         }
       })
       .catch((err) => {
         this.setState({loading: false});
-        console.log(err);
+        console.log('Status: ' + err);
       });
   }
 
@@ -110,36 +108,6 @@ export default class CStatus extends Component {
     }
   }
 
-  payment2() {
-    this.setState({loading: true});
-    fetch(`https://si--amanah.herokuapp.com/api/payment`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.state.token}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        JSON.stringify(responseJson);
-        console.log(responseJson);
-        if (responseJson.data) {
-          this.setState({
-            loading: false,
-            data: responseJson.data,
-          });
-          console.log(this.state.data);
-        } else {
-          this.setState({loading: false});
-          console.log(this.state.data);
-        }
-      })
-      .catch((err) => {
-        this.setState({loading: false});
-        console.log(err);
-      });
-  }
-
   createFormData = (photo, body) => {
     const data = new FormData();
     data.append('bukti', {
@@ -172,7 +140,7 @@ export default class CStatus extends Component {
     return (
       <View style={{flex: 1, padding: 10}}>
         <ScrollView>
-          {this.state.data == '' ? (
+          {this.state.data == null ? (
             <View style={styles.viewLoading}>
               <LottieView
                 source={require('../../assets/8205-loading-animation.json')}
@@ -184,7 +152,7 @@ export default class CStatus extends Component {
             <View>
               <Text style={styles.urOrder}>Pesanan anda:</Text>
               <View style={{marginRight: 10}}>
-                {/* {this.state.data.map((value, index) => (
+                {this.state.data.map((value, index) => (
                   <ScrollView key={index} horizontal={true}>
                     <View>
                       <View style={styles.viewItem}>
@@ -196,7 +164,7 @@ export default class CStatus extends Component {
                       </View>
                     </View>
                   </ScrollView>
-                ))} */}
+                ))}
               </View>
               <Text>Kirim bukti pembayaran.</Text>
               <TouchableOpacity

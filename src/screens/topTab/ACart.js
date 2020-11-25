@@ -58,17 +58,17 @@ class Cart extends Component {
             loading: false,
             cart: responseJson.data,
           });
-          console.log(this.state.cart);
+          console.log('Cart: ' + this.state.cart);
         } else {
           this.setState({loading: false});
-          console.log(this.state.cart);
+          console.log('Cart: ' + this.state.cart);
         }
         this.setState({refresh: false});
       })
       .catch((err) => {
         this.setState({loading: false});
         this.setState({refresh: false});
-        console.log(err);
+        console.log('Cart: ' + err);
       });
   }
 
@@ -114,7 +114,7 @@ class Cart extends Component {
           if (response.status == 'Success') this.setState({loading: false});
           console.log(response);
           alert('Pesanan Anda telah dibuat! Harap kirim bukti pembayaran.');
-          this.getItem();
+          this.props.navigation.replace('BottomTab', {screen: 'Transaksi'});
         })
         .catch((error) => {
           this.setState({loading: false});

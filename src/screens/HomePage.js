@@ -58,7 +58,6 @@ class HomePage extends Component {
             isLoading: false,
             dataSource: responseJson[0].data,
           });
-          console.log(this.state.dataSource);
           console.log('Barang terbaru: ' + responseJson[0].data[0].name);
         } else {
           alert('error');

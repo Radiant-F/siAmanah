@@ -200,7 +200,7 @@ class Profile extends Component {
                   <TouchableOpacity
                     style={{justifyContent: 'center', alignItems: 'center'}}
                     onPress={() =>
-                      this.props.navigation.navigate('ProfileEdit', {
+                      this.props.navigation.replace('ProfileEdit', {
                         data: this.state.user,
                       })
                     }>

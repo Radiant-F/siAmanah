@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage';
+import LottieView from 'lottie-react-native';
 import React, {Component} from 'react';
 import {
   Image,
@@ -9,6 +10,7 @@ import {
   ImageBackground,
   ShadowPropTypesIOS,
   TouchableOpacity,
+  Button,
 } from 'react-native';
 
 class Nota extends Component {
@@ -39,21 +41,23 @@ class Nota extends Component {
 
   getNota() {
     this.setState({loading: true});
-    fetch(`https://si--amanah.herokuapp.com/api/payment/3`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.state.token}`,
+    fetch(
+      `https://si--amanah.herokuapp.com/api/payment/${this.props.route.params.data.order_id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.state.token}`,
+        },
       },
-    })
+    )
       .then((response) => response.json())
       .then((responseJson) => {
         JSON.stringify(responseJson);
-        // console.log(responseJson);
         if (responseJson != null || '') {
           this.setState({
             loading: false,
-            nota: responseJson.data,
+            nota: responseJson.data[0],
           });
           console.log(this.state.nota);
         } else {
@@ -66,6 +70,39 @@ class Nota extends Component {
         console.log(err);
         this.setState({loading: false});
         this.setState({refresh: false});
+      });
+  }
+
+  confirm() {
+    this.setState({loading: true});
+    fetch(
+      `http://si--amanah.herokuapp.com/api/send/${this.props.route.params.data.id}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.state.token}`,
+        },
+      },
+    )
+      .then((response) => response.json())
+      .then((responseJSON) => {
+        console.log(responseJSON);
+        if (responseJSON.status == 'Success') {
+          console.log(responseJSON);
+          this.setState({loading: false});
+          alert(
+            'Pesanan telah anda konfirmasi. Barang akan dikirim kepada pembeli.',
+          );
+          this.props.navigation.replace('BottomTab', {screen: 'Profil'});
+        } else {
+          this.setState({loading: false});
+          alert('Gagal dikonfirmasi.');
+        }
+      })
+      .catch((err) => {
+        this.setState({loading: false});
+        alert('Terjadi kesalahan. ' + err);
       });
   }
 
@@ -83,11 +120,39 @@ class Nota extends Component {
             <Text style={styles.headerText}>Nota Pembeli</Text>
           </ImageBackground>
         </View>
-        <ScrollView>
-          <Text> Bukti gambar: {this.state.nota.bukti} </Text>
-          <Text> Jumlah nominal: {this.state.nota.amount}</Text>
-          <Text> Nama pembeli: {this.state.nota.name} </Text>
-        </ScrollView>
+        {this.state.nota == '' ? (
+          <View style={styles.viewLoading}>
+            <LottieView
+              autoPlay
+              style={{width: 120}}
+              source={require('../assets/8205-loading-animation.json')}
+            />
+          </View>
+        ) : (
+          <ScrollView>
+            <View style={styles.viewNota}>
+              <Image
+                source={{uri: this.state.nota.bukti}}
+                style={styles.image}
+              />
+              <View style={styles.text}>
+                <Text>
+                  {' '}
+                  Jumlah Nominal:
+                  <Text style={{fontWeight: 'bold'}}>
+                    {' '}
+                    Rp.{this.state.nota.amount},-
+                  </Text>
+                </Text>
+                <Text> Nama pembeli: {this.state.nota.name} </Text>
+                <Text> Dikirim ke: {this.state.nota.transfer_to} </Text>
+              </View>
+              <View style={styles.button}>
+                <Button title="Konfirmasi" onPress={() => this.confirm()} />
+              </View>
+            </View>
+          </ScrollView>
+        )}
       </View>
     );
   }
@@ -96,10 +161,6 @@ class Nota extends Component {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: '#4EC5F1',
-    // height: 60,
-    // alignItems: 'center',
-    // paddingHorizontal: 20,
-    // flexDirection: 'row',
   },
   headerBg: {
     paddingHorizontal: 15,
@@ -140,6 +201,39 @@ const styles = StyleSheet.create({
   },
   textName: {
     fontSize: 20,
+  },
+  viewLoading: {
+    backgroundColor: 'white',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignSelf: 'center',
+    width: '100%',
+    elevation: 2,
+    marginBottom: 10,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    alignSelf: 'center',
+    margin: 10,
+    borderRadius: 5,
+  },
+  viewNota: {
+    margin: 5,
+    padding: 5,
+    backgroundColor: '#fff',
+    borderRadius: 5,
+    elevation: 2,
+    marginBottom: 10,
+  },
+  button: {
+    margin: 10,
+  },
+  text: {
+    padding: 5,
+    borderColor: 'black',
+    borderWidth: 1,
   },
 });
 

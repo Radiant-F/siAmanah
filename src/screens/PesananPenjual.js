@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-community/async-storage';
+import LottieView from 'lottie-react-native';
 import React, {Component} from 'react';
 import {
   Text,
@@ -76,56 +77,46 @@ export default class PesananPenjual extends Component {
           </ImageBackground>
         </View>
         <ScrollView>
-          {/* {this.state.cart.map((value, index) => ( */}
-          <View
-          // key={index}
-          >
-            <View style={styles.viewOrder}>
-              <Image
-                // source={{uri: value.product.image}}
-                style={styles.imageOrder}
-              />
-              <View
-                style={{
-                  flex: 1,
-                  borderLeftColor: 'black',
-                  borderLeftWidth: 1,
-                  paddingLeft: 10,
-                }}>
-                <Text numberOfLines={1} style={styles.textProduct}>
-                  {/* {value.product.name} */}
-                </Text>
-                <Text>Jumlah harga :</Text>
-                <Text style={styles.textPrice}>
-                  {/* Rp.{value.jumlah_harga},- */}
-                </Text>
-                <Text>{/* Jumlah pesanan: {value.jumlah} */}</Text>
+          <View style={{padding: 10}}>
+            {this.state.dataSource == '' ? (
+              <View style={styles.viewLoading}>
+                <LottieView
+                  autoPlay
+                  style={{width: 120}}
+                  source={require('../assets/8205-loading-animation.json')}
+                />
               </View>
-              <TouchableOpacity
-                style={styles.deleteOrder}
-                // key={index}
-                onPress={() => this.abortOrder(value.id)}>
-                {/* <Image
-                  source={require('../assets/rubbish-bin-delete-button.png')}
-                  style={styles.bin}
-                /> */}
-                <Text style={{textAlign: 'center', color: 'red'}}>Tolak</Text>
-              </TouchableOpacity>
-            </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-evenly',
-                marginVertical: 5,
-              }}>
-              <Button
-                title="Lihat bukti pembayaran"
-                onPress={() => this.props.navigation.navigate('Nota')}
-              />
-              <Button title="Konfirmasi" onPress={() => this.confirmOrder()} />
-            </View>
+            ) : (
+              <View>
+                {this.state.dataSource.map((value, index) => (
+                  <View key={index}>
+                    <View style={styles.viewPesanan}>
+                      <Image
+                        source={{uri: value.product.image}}
+                        style={styles.image}
+                      />
+                      <View style={styles.viewText}>
+                        <Text style={styles.name}>{value.product.name}</Text>
+                        <Text>Jumlah pesanan: {value.jumlah}</Text>
+                        <Text>Jumlah harga: Rp.{value.jumlah_harga},-</Text>
+                        <Text>ID pembeli: {value.order.customer_id}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.viewButton}>
+                      <Button
+                        title="Lihat bukti pembayaran"
+                        onPress={() =>
+                          this.props.navigation.navigate('Nota', {
+                            data: value,
+                          })
+                        }
+                      />
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
-          {/* ))} */}
         </ScrollView>
       </View>
     );
@@ -188,5 +179,42 @@ const styles = StyleSheet.create({
     height: 30,
     alignSelf: 'center',
     tintColor: 'red',
+  },
+  viewLoading: {
+    backgroundColor: 'white',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignSelf: 'center',
+    width: '100%',
+    elevation: 2,
+    marginBottom: 10,
+  },
+  viewButton: {
+    marginVertical: 5,
+  },
+  viewPesanan: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    padding: 5,
+    borderRadius: 10,
+    elevation: 2,
+  },
+  image: {
+    width: 120,
+    height: 120,
+    marginRight: 5,
+    borderRadius: 5,
+  },
+  viewText: {
+    marginLeft: 5,
+    flex: 1,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    borderBottomColor: 'black',
+    borderBottomWidth: 1,
   },
 });
