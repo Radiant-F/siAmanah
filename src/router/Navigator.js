@@ -13,16 +13,16 @@ import Chat from '../screens/Chat';
 import ScreenBooks from '../screens/categories/ScreenBooks';
 import ScreenClothes from '../screens/categories/ScreenClothes';
 import ScreenElektronics from '../screens/categories/ScreenElektronics';
-import DetailProduct from '../screens/ProductDetail';
-import OpenStore from '../screens/OpenStore';
 import ProfileEdit from '../screens/ProfileEdit';
-import AddProduct from '../screens/ProductAdd';
-import EditProoduct from '../screens/ProductEdit';
+import OpenStore from '../screens/OpenStore';
+import DetailProduct from '../screens/product/ProductDetail';
+import ProductSearch from '../screens/product/ProductSearch';
+import AddProduct from '../screens/product/ProductAdd';
+import EditProoduct from '../screens/product/ProductEdit';
 import PesananPenjual from '../screens/PesananPenjual';
 import ChatScreen from '../screens/ChatScreen';
 import Nota from '../screens/Nota';
-import DetailOrder from '../screens/topTab/BOrderDetail';
-import ProductSearch from '../screens/ProductSearch';
+import DetailOrder from '../screens/topTab/DOrderDetail';
 
 const Stack = createStackNavigator();
 

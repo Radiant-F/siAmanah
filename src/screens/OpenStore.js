@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import ImagePicker from 'react-native-image-picker';
 import AsyncStorage from '@react-native-community/async-storage';
+import LottieView from 'lottie-react-native';
 import {
   Image,
   ScrollView,
@@ -122,7 +123,6 @@ class OpenStore extends Component {
       [
         {
           text: 'Ok',
-          onPress: () => console.log('Cancel Pressed'),
         },
       ],
       {cancelable: false},
@@ -155,54 +155,56 @@ class OpenStore extends Component {
           />
           <Text style={styles.headerText}>Buka Toko</Text>
         </View>
-        <View style={styles.input}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Nama Toko"
-            onChangeText={(input) => this.setState({name: input})}
-          />
-        </View>
-        <TouchableOpacity
-          style={styles.viewPP}
-          onPress={() => this.handleChoosePhoto()}>
-          {this.state.photo !== '' ? (
-            <Image source={{uri: this.state.photo.uri}} style={styles.pp} />
-          ) : (
-            <View style={styles.ppnt}>
-              <Text style={styles.textUploadPp}>Foto Toko</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        <View style={styles.input}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Deskripsi"
-            onChangeText={(input) => this.setState({description: input})}
-          />
-          <TextInput
-            style={styles.textInput}
-            placeholder="Alamat Toko"
-            onChangeText={(input) => this.setState({alamat: input})}
-          />
-        </View>
-        <View style={styles.viewOption}>
+        <ScrollView>
+          <View style={styles.input}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Nama Toko"
+              onChangeText={(input) => this.setState({name: input})}
+            />
+          </View>
           <TouchableOpacity
-            style={styles.touchOption}
-            onPress={() =>
-              this.props.navigation.replace('BottomTab', {screen: 'Profil'})
-            }>
-            <Text style={styles.text}>Batal</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.touchOption1}
-            onPress={() => this.addToko()}>
-            {this.state.loading ? (
-              <ActivityIndicator size="small" color="grey" />
+            style={styles.viewPP}
+            onPress={() => this.handleChoosePhoto()}>
+            {this.state.photo !== '' ? (
+              <Image source={{uri: this.state.photo.uri}} style={styles.pp} />
             ) : (
-              <Text style={styles.text}>Lanjut</Text>
+              <View style={styles.ppnt}>
+                <Text style={styles.textUploadPp}>Foto Toko</Text>
+              </View>
             )}
           </TouchableOpacity>
-        </View>
+          <View style={styles.input}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Deskripsi"
+              onChangeText={(input) => this.setState({description: input})}
+            />
+            <TextInput
+              style={styles.textInput}
+              placeholder="Alamat Toko"
+              onChangeText={(input) => this.setState({alamat: input})}
+            />
+          </View>
+          <View style={styles.viewOption}>
+            <TouchableOpacity
+              style={styles.touchOption}
+              onPress={() =>
+                this.props.navigation.replace('BottomTab', {screen: 'Profil'})
+              }>
+              <Text style={styles.text}>Batal</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.touchOption1}
+              onPress={() => this.addToko()}>
+              {this.state.loading ? (
+                <ActivityIndicator color="blue" size="small" />
+              ) : (
+                <Text style={styles.text}>Lanjut</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
     );
   }

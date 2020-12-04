@@ -80,12 +80,12 @@ export default class ProductSearch extends Component {
       <View style={{flex: 1}}>
         <View style={styles.header}>
           <ImageBackground
-            source={require('../assets/headerHome.png')}
+            source={require('../../assets/headerHome.png')}
             style={styles.headerBg}>
             <TouchableOpacity
               onPress={() => this.props.navigation.replace('BottomTab')}>
               <Image
-                source={require('../assets/go-back-left-arrow.png')}
+                source={require('../../assets/go-back-left-arrow.png')}
                 style={styles.headerIcon}
               />
             </TouchableOpacity>
@@ -95,7 +95,7 @@ export default class ProductSearch extends Component {
         <ScrollView>
           <View style={styles.viewSearch}>
             <Image
-              source={require('../assets/searching-magnifying-glass.png')}
+              source={require('../../assets/searching-magnifying-glass.png')}
               style={styles.searchIcon}
               onPress={() => this.props.navigation.replace('ProductSearch')}
             />
@@ -117,7 +117,7 @@ export default class ProductSearch extends Component {
               {this.state.data == '' ? (
                 <View style={styles.viewLoading}>
                   <LottieView
-                    source={require('../assets/18013-searching.json')}
+                    source={require('../../assets/18013-searching.json')}
                     autoPlay={true}
                     style={{height: 115}}
                   />
@@ -149,7 +149,7 @@ export default class ProductSearch extends Component {
                       <View style={styles.viewAnother}>
                         <View style={styles.location}>
                           <Image
-                            source={require('../assets/map-placeholder.png')}
+                            source={require('../../assets/map-placeholder.png')}
                             style={styles.map}
                           />
                           <Text style={styles.textLoc}>
@@ -158,7 +158,7 @@ export default class ProductSearch extends Component {
                         </View>
                         <TouchableOpacity>
                           <Image
-                            source={require('../assets/favorite-heart-outline-button.png')}
+                            source={require('../../assets/favorite-heart-outline-button.png')}
                             style={styles.fav}
                           />
                         </TouchableOpacity>

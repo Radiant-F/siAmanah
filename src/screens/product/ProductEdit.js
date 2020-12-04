@@ -15,6 +15,7 @@ import {
   View,
   Picker,
   Alert,
+  ToastAndroid,
 } from 'react-native';
 
 class ProfileEdit extends Component {
@@ -30,6 +31,7 @@ class ProfileEdit extends Component {
       weight: '',
       photo: '',
       stock: '',
+      id: '',
     };
   }
 
@@ -37,7 +39,15 @@ class ProfileEdit extends Component {
     AsyncStorage.getItem('token').then((token) => {
       if (token !== null) {
         console.log('token tersedia.');
-        this.setState({token: token});
+        this.setState({
+          token: token,
+          name: this.props.route.params.data.name,
+          description: this.props.route.params.data.description,
+          price: this.props.route.params.data.price,
+          stock: this.props.route.params.data.stock,
+          weight: this.props.route.params.data.weight,
+          id: this.props.route.params.data.id,
+        });
         this.getCategory();
       } else {
         console.log('Tidak ada token. User harus login atau daftar.');
@@ -46,7 +56,6 @@ class ProfileEdit extends Component {
   }
 
   getCategory() {
-    console.log('mengambil kategori..');
     fetch('http://si--amanah.herokuapp.com/api/category', {
       method: 'GET',
       headers: {
@@ -57,14 +66,14 @@ class ProfileEdit extends Component {
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({category: responseJson.data});
-        console.log(responseJson.data);
       })
       .catch((err) => {
         console.log(err);
+        alert(err);
       });
   }
 
-  addProduct() {
+  editProduct() {
     const {
       name,
       description,
@@ -84,6 +93,7 @@ class ProfileEdit extends Component {
       stock !== ''
     ) {
       const product = {
+        _method: 'PUT',
         name: name,
         description: description,
         category_id: category_id,
@@ -92,17 +102,20 @@ class ProfileEdit extends Component {
         stock: stock,
       };
       this.setState({loading: true});
-      fetch('http://si--amanah.herokuapp.com/api/product', {
-        method: 'POST',
-        body: this.createFormData(photo, product),
-        headers: {
-          Authorization: `Bearer ${this.state.token}`,
+      fetch(
+        `http://si--amanah.herokuapp.com/api/product/${this.props.route.params.data.id}`,
+        {
+          method: 'POST',
+          body: this.createFormData(photo, product),
+          headers: {
+            Authorization: `Bearer ${this.state.token}`,
+          },
         },
-      })
+      )
         .then((response) => response.json())
         .then((response) => {
           if (response) this.setState({loading: false});
-          this.alert();
+          ToastAndroid.show('Produk telah disunting.', ToastAndroid.LONG);
           console.log(response);
           this.props.navigation.replace('BottomTab', {screen: 'Profile'});
         })
@@ -117,8 +130,33 @@ class ProfileEdit extends Component {
     }
   }
 
+  deleteProduct() {
+    fetch(
+      `http://si--amanah.herokuapp.com/api/product/${this.props.route.params.data.id}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.state.token}`,
+        },
+      },
+    )
+      .then((response) => response.json())
+      .then((json) => {
+        const {status} = json;
+        if (status == 'Success') {
+          ToastAndroid.show('Produk telah dihapus.', ToastAndroid.LONG);
+          this.props.navigation.replace('BottomTab', {screen: 'Profile'});
+        } else {
+          alert('Gagal menghapus');
+        }
+      })
+      .catch((err) => console.log(err));
+  }
+
   createFormData = (photo, body) => {
     const data = new FormData();
+
     data.append('image', {
       name: photo.fileName,
       type: photo.type,
@@ -148,14 +186,29 @@ class ProfileEdit extends Component {
   alert() {
     Alert.alert(
       'Sukses',
-      'Barang telah ditambahkan.',
+      'Barang telah disunting.',
       [
         {
           text: 'Ok',
-          onPress: () => console.log('Cancel Pressed'),
         },
       ],
       {cancelable: false},
+    );
+  }
+
+  alert2() {
+    Alert.alert(
+      'Anda yakin?',
+      'Barang akan dihapus dan tidak bisa diulang kembali.',
+      [
+        {
+          text: 'Batal',
+        },
+        {
+          text: 'Iya',
+          onPress: () => this.deleteProduct(),
+        },
+      ],
     );
   }
 
@@ -164,16 +217,17 @@ class ProfileEdit extends Component {
       <View style={{flex: 1}}>
         <View style={styles.header}>
           <Image
-            source={require('../assets/cartPurchase.png')}
+            source={require('../../assets/cartPurchase.png')}
             style={styles.headerIcon}
           />
-          <Text style={styles.headerText}>Tambah Produk</Text>
+          <Text style={styles.headerText}>Edit Produk</Text>
         </View>
         <ScrollView>
           <View style={styles.input}>
             <Text>Nama Produk</Text>
             <TextInput
-              placeholder="eg. Keqing Cosplay"
+              value={this.state.name}
+              placeholder="eg. Susu Kental Manis"
               onChangeText={(input) => this.setState({name: input})}
               style={styles.textInput}
             />
@@ -181,12 +235,13 @@ class ProfileEdit extends Component {
           <TouchableOpacity
             style={styles.viewPP}
             onPress={() => this.handleEditPhoto()}>
-            {this.state.photo !== '' ? (
-              <Image source={{uri: this.state.photo.uri}} style={styles.pp} />
+            {this.state.photo == '' ? (
+              <Image
+                source={{uri: this.props.route.params.data.image}}
+                style={styles.pp}
+              />
             ) : (
-              <View style={styles.pp}>
-                <Text style={styles.textPlus}>+</Text>
-              </View>
+              <Image source={this.state.photo} style={styles.pp} />
             )}
           </TouchableOpacity>
           <View style={styles.input}>
@@ -209,6 +264,7 @@ class ProfileEdit extends Component {
                 <View>
                   <Text>Stok</Text>
                   <TextInput
+                    value={`${this.state.stock}`}
                     keyboardType={'number-pad'}
                     placeholder="eg. 50"
                     onChangeText={(input) => this.setState({stock: input})}
@@ -218,6 +274,7 @@ class ProfileEdit extends Component {
                 <View>
                   <Text>Berat (KG)</Text>
                   <TextInput
+                    value={`${this.state.weight}`}
                     keyboardType={'number-pad'}
                     placeholder="eg. 5"
                     onChangeText={(input) => this.setState({weight: input})}
@@ -228,7 +285,8 @@ class ProfileEdit extends Component {
             </View>
             <Text>Deskripsi</Text>
             <TextInput
-              placeholder="eg. Untuk wanita!"
+              value={this.state.description}
+              placeholder="eg. Semanis senyuman dia!"
               onChangeText={(input) => this.setState({description: input})}
               style={styles.textInput}
             />
@@ -240,13 +298,15 @@ class ProfileEdit extends Component {
                 alignItems: 'center',
               }}>
               <Text style={{fontSize: 20}}>Rp.</Text>
+
               <TextInput
+                value={`${this.state.price}`}
                 keyboardType="number-pad"
                 placeholder="eg. Rp.50.000,-"
                 onChangeText={(input) => this.setState({price: input})}
                 style={styles.textInput3}
               />
-              <Text style={{fontSize: 20}}> ,-</Text>
+              <Text style={{fontSize: 20}}>,-</Text>
             </View>
           </View>
           <View
@@ -254,26 +314,33 @@ class ProfileEdit extends Component {
               flexDirection: 'row',
               justifyContent: 'space-evenly',
               marginVertical: 10,
+              alignItems: 'center',
             }}>
             <TouchableOpacity
               style={styles.touchAbort}
               onPress={() =>
-                this.props.navigation.replace('BottomTab', {screen: 'Profil'})
+                this.props.navigation.replace('BottomTab', {screen: 'Profile'})
               }>
               <Text style={styles.text}> Batal </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => this.alert2()}>
+              <Image
+                source={require('../../assets/rubbish-bin-delete-button.png')}
+                style={{width: 40, height: 40}}
+              />
             </TouchableOpacity>
             {this.state.loading ? (
               <View style={styles.touchEdit2}>
                 <LottieView
-                  source={require('../assets/8205-loading-animation.json')}
+                  source={require('../../assets/8205-loading-animation.json')}
                   autoPlay={true}
                 />
               </View>
             ) : (
               <TouchableOpacity
                 style={styles.touchEdit}
-                onPress={() => this.addProduct()}>
-                <Text style={styles.text}> Tambahkan </Text>
+                onPress={() => this.editProduct()}>
+                <Text style={styles.text}> Edit Produk </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -328,7 +395,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   touchAbort: {
-    width: 160,
+    width: '40%',
     height: 50,
     paddingHorizontal: 10,
     justifyContent: 'center',
@@ -337,7 +404,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   touchEdit: {
-    width: 160,
+    width: '40%',
     height: 50,
     paddingHorizontal: 10,
     justifyContent: 'center',
@@ -346,7 +413,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   touchEdit2: {
-    width: 158,
+    width: 143.5,
     height: 50,
     paddingHorizontal: 10,
     justifyContent: 'center',
@@ -365,7 +432,6 @@ const styles = StyleSheet.create({
     },
   },
   textInput: {
-    flex: 1,
     borderColor: 'black',
     borderWidth: 2,
     paddingHorizontal: 10,
@@ -383,6 +449,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
     width: 150,
   },
+  textPlus: {
+    alignSelf: 'center',
+    fontSize: 50,
+  },
   textInput3: {
     flex: 1,
     borderColor: 'black',
@@ -392,10 +462,6 @@ const styles = StyleSheet.create({
     height: 40,
     marginBottom: 15,
     marginTop: 5,
-  },
-  textPlus: {
-    alignSelf: 'center',
-    fontSize: 50,
   },
 });
 

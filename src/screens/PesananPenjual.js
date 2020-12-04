@@ -102,7 +102,6 @@ export default class PesananPenjual extends Component {
       [
         {
           text: 'Ok',
-          onPress: () => console.log('Cancel Pressed'),
         },
       ],
       {cancelable: false},

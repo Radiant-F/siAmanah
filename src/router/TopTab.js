@@ -1,8 +1,8 @@
 import React from 'react';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import Cart from '../screens/topTab/ACart';
-import Status from '../screens/topTab/CStatus';
-import Histori from '../screens/topTab/DHistory';
+import Status from '../screens/topTab/BStatus';
+import Histori from '../screens/topTab/CHistory';
 
 const Tabs = createMaterialTopTabNavigator();
 

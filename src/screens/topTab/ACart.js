@@ -129,12 +129,15 @@ class Cart extends Component {
         })
         .catch((error) => {
           this.setState({loading: false});
-          console.log(error);
-          alert('Gagal membuat pesanan.');
+          alert('Terjadi kesalahan. ', error);
         });
     } else {
       this.setState({loading: false});
-      alert('Harap isi alamat tujuan.');
+      ToastAndroid.show(
+        'Harap isi alamat tujuan.',
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER,
+      );
     }
   }
 
@@ -145,7 +148,6 @@ class Cart extends Component {
       [
         {
           text: 'Ok',
-          onPress: () => console.log('Cancel Pressed'),
         },
       ],
       {cancelable: false},

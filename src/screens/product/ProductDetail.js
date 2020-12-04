@@ -112,36 +112,45 @@ export class DetailProduct extends Component {
 
   addCartInstant() {
     if (this.state.qty != 0) {
-      const {qty} = this.state;
-      const kirimData = {jumlah_pesan: qty};
-      this.setState({loading: true});
-      fetch(
-        `http://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
-        {
-          method: 'POST',
-          body: JSON.stringify(kirimData),
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.state.token}`,
+      if (
+        this.state.stok + this.state.qty <=
+        this.props.route.params.item.stock
+      ) {
+        const {qty} = this.state;
+        const kirimData = {jumlah_pesan: qty};
+        this.setState({loading: true});
+        fetch(
+          `http://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
+          {
+            method: 'POST',
+            body: JSON.stringify(kirimData),
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.state.token}`,
+            },
           },
-        },
-      )
-        .then((response) => response.json())
-        .then((responseJSON) => {
-          const {status} = responseJSON;
-          if (status != 'error') {
-            console.log(responseJSON);
+        )
+          .then((response) => response.json())
+          .then((responseJSON) => {
+            const {status} = responseJSON;
+            if (status != 'error') {
+              console.log(responseJSON);
+              this.setState({loading: false});
+              this.props.navigation.replace('BottomTab', {
+                screen: 'Transaction',
+              });
+            } else {
+              this.setState({loading: false});
+              alert('Harap perhatikan stok.');
+            }
+          })
+          .catch((err) => {
             this.setState({loading: false});
-            this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
-          } else {
-            this.setState({loading: false});
-            alert('Harap perhatikan stok.');
-          }
-        })
-        .catch((err) => {
-          this.setState({loading: false});
-          alert('Terjadi kesalahan. ' + err);
-        });
+            alert('Terjadi kesalahan. ' + err);
+          });
+      } else {
+        this.overStock();
+      }
     } else {
       this.over();
     }
@@ -181,11 +190,10 @@ export class DetailProduct extends Component {
   over() {
     Alert.alert(
       'Perhatian',
-      'Mau beli berapa banyak.',
+      'Mau beli berapa banyak?',
       [
         {
-          text: 'Kembali',
-          onPress: () => console.log('Cancel Pressed'),
+          text: 'Ok',
         },
       ],
       {cancelable: false},
@@ -199,7 +207,6 @@ export class DetailProduct extends Component {
       [
         {
           text: 'Ok',
-          onPress: () => console.log('Cancel Pressed'),
         },
       ],
       {cancelable: false},
@@ -213,7 +220,7 @@ export class DetailProduct extends Component {
           <TouchableOpacity
             onPress={() => this.props.navigation.replace('BottomTab')}>
             <Image
-              source={require('../assets/go-back-left-arrow.png')}
+              source={require('../../assets/go-back-left-arrow.png')}
               style={styles.headerIconBack}
             />
           </TouchableOpacity>
@@ -227,7 +234,7 @@ export class DetailProduct extends Component {
               })
             }>
             <Image
-              source={require('../assets/shopping-cart.png')}
+              source={require('../../assets/shopping-cart.png')}
               style={styles.headerIcon}
             />
           </TouchableOpacity>
@@ -279,14 +286,14 @@ export class DetailProduct extends Component {
                 </TouchableOpacity>
                 {this.state.loading ? (
                   <LottieView
-                    source={require('../assets/36605-shopping-cart.json')}
+                    source={require('../../assets/36605-shopping-cart.json')}
                     autoPlay={true}
                     style={{width: 40, height: 40}}
                   />
                 ) : (
                   <TouchableOpacity onPress={() => this.addCart()}>
                     <Image
-                      source={require('../assets/cartPurchase.png')}
+                      source={require('../../assets/cartPurchase.png')}
                       style={styles.cartImage}
                     />
                   </TouchableOpacity>
@@ -312,7 +319,7 @@ export class DetailProduct extends Component {
                     </Text>
                     <View style={{flexDirection: 'row', alignItems: 'center'}}>
                       <Image
-                        source={require('../assets/map-placeholder.png')}
+                        source={require('../../assets/map-placeholder.png')}
                         style={styles.star2}
                       />
                       <Text style={styles.textToko2}>
@@ -323,7 +330,7 @@ export class DetailProduct extends Component {
                   </View>
                   <View style={styles.viewStar}>
                     <Image
-                      source={require('../assets/rate-star-button.png')}
+                      source={require('../../assets/rate-star-button.png')}
                       style={styles.star}
                     />
                     <Text style={styles.textStar}>Star Seller</Text>
