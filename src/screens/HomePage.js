@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import Swiper from 'react-native-swiper';
 import AsyncStorage from '@react-native-community/async-storage';
-import {product} from '../components/Data';
 import LottieView from 'lottie-react-native';
+import _ from 'lodash';
 import {
   Image,
   ScrollView,
@@ -11,9 +11,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  FlatList,
-  ActivityIndicator,
   ImageBackground,
+  RefreshControl,
 } from 'react-native';
 
 class HomePage extends Component {
@@ -25,7 +24,12 @@ class HomePage extends Component {
       token: '',
       user: {},
       is_first: '0',
+      refresh: false,
     };
+  }
+
+  toPrice(price) {
+    return _.replace(price, /\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
   componentDidMount() {
@@ -42,6 +46,7 @@ class HomePage extends Component {
   }
 
   getItem() {
+    console.log('mengambil semua barang..');
     this.setState({isLoading: true});
     fetch(`https://si--amanah.herokuapp.com/api/product`, {
       method: 'GET',
@@ -57,17 +62,18 @@ class HomePage extends Component {
           this.setState({
             isLoading: false,
             dataSource: responseJson[0].data,
+            refresh: false,
           });
-          console.log('Barang terbaru: ' + responseJson[0].data[0].name);
+          console.log('barang terbaru: ' + responseJson[0].data[0].name);
         } else {
-          alert('error');
-          this.setState({isLoading: false});
+          this.setState({isLoading: false, refresh: false});
+          alert('Error');
           console.log(responseJson);
         }
       })
       .catch((err) => {
-        this.setState({isLoading: false});
-        console.log(err);
+        this.setState({isLoading: false, refresh: false});
+        console.log('Terjadi kesalahan. ' + err);
       });
   }
 
@@ -99,7 +105,16 @@ class HomePage extends Component {
             </TouchableOpacity>
           </ImageBackground>
         </View>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refresh}
+              onRefresh={() => {
+                this.setState({refresh: true});
+                this.getItem();
+              }}
+            />
+          }>
           <View style={{flex: 1, marginBottom: 10}}>
             <Swiper height={200} autoplay={true}>
               <TouchableOpacity style={styles.slide}>
@@ -126,7 +141,7 @@ class HomePage extends Component {
             <View style={styles.subViewCategory}>
               <TouchableOpacity
                 style={styles.touchCategory}
-                onPress={() => this.props.navigation.navigate('Electronics')}>
+                onPress={() => this.props.navigation.replace('Electronics')}>
                 <Image
                   source={require('../assets/electronik.png')}
                   style={styles.viewCategoryIcon}
@@ -135,7 +150,7 @@ class HomePage extends Component {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.touchCategory}
-                onPress={() => this.props.navigation.navigate('Books')}>
+                onPress={() => this.props.navigation.replace('Books')}>
                 <Image
                   source={require('../assets/buku.png')}
                   style={styles.viewCategoryIcon}
@@ -145,7 +160,7 @@ class HomePage extends Component {
 
               <TouchableOpacity
                 style={styles.touchCategory}
-                onPress={() => this.props.navigation.navigate('Clothes')}>
+                onPress={() => this.props.navigation.replace('Clothes')}>
                 <Image
                   source={require('../assets/pakaian.png')}
                   style={styles.viewCategoryIcon}
@@ -155,17 +170,19 @@ class HomePage extends Component {
             </View>
           </View>
           <Text style={styles.textRecommendation}> Baru Ditambah </Text>
-          <View style={styles.viewSearch}>
+          <View
+            style={styles.viewSearch}
+            onPress={() => this.props.navigation.replace('ProductSearch')}>
             <Image
               source={require('../assets/searching-magnifying-glass.png')}
               style={styles.searchIcon}
+              onPress={() => this.props.navigation.replace('ProductSearch')}
             />
-            <TextInput
+            <Text
               style={{paddingLeft: 10, flex: 1}}
-              placeholder="Cari barang.."
-              placeholderTextColor="#4EC5F1"
-              selectionColor="#4EC5F1"
-            />
+              onPress={() => this.props.navigation.replace('ProductSearch')}>
+              Cari barang..
+            </Text>
           </View>
           {/* ============ MAP API ============ */}
           {this.state.isLoading ? (
@@ -193,17 +210,23 @@ class HomePage extends Component {
                       <Text numberOfLines={1} style={styles.textProduct}>
                         {value.name}
                       </Text>
-                      <Text style={styles.textPrice}>Rp.{value.price},-</Text>
+                      <Text style={styles.textPrice}>
+                        Rp.{this.toPrice(value.price)},-
+                      </Text>
                     </View>
-                    <TouchableOpacity style={{alignSelf: 'flex-end'}}>
+                  </View>
+                  <View style={styles.viewAnother}>
+                    <View style={styles.location}>
+                      <Image
+                        source={require('../assets/map-placeholder.png')}
+                        style={styles.map}
+                      />
+                      <Text style={styles.textLoc}>{value.user.alamat}</Text>
+                    </View>
+                    <TouchableOpacity>
                       <Image
                         source={require('../assets/favorite-heart-outline-button.png')}
-                        style={{
-                          width: 20,
-                          height: 20,
-                          alignSelf: 'flex-end',
-                          tintColor: 'tomato',
-                        }}
+                        style={styles.fav}
                       />
                     </TouchableOpacity>
                   </View>
@@ -366,13 +389,38 @@ const styles = StyleSheet.create({
   },
   textDesc: {},
   viewLoading: {
-    width: '100%',
+    width: '95%',
     backgroundColor: 'white',
     alignItems: 'center',
     padding: 10,
     borderRadius: 10,
     alignSelf: 'center',
     margin: 10,
+    elevation: 3,
+  },
+  fav: {
+    width: 20,
+    height: 20,
+    tintColor: 'tomato',
+  },
+  viewAnother: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  map: {
+    width: 15,
+    height: 15,
+    marginRight: 5,
+    tintColor: 'grey',
+  },
+  location: {
+    flexDirection: 'row',
+    flex: 1,
+    alignItems: 'center',
+  },
+  textLoc: {
+    color: 'grey',
   },
 });
 

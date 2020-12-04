@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 
 class OpenStore extends Component {
@@ -17,15 +18,11 @@ class OpenStore extends Component {
     super();
     this.state = {
       token: '',
-      dataSource: [],
-      modal: false,
       loading: false,
-      photo: '',
-      namaToko: '',
+      name: '',
+      description: '',
       alamat: '',
-      kodePos: '',
-      namaKota: '',
-      noTelepon: '',
+      photo: '',
     };
   }
 
@@ -44,54 +41,38 @@ class OpenStore extends Component {
   }
 
   addToko() {
-    const {
-      photo,
-      namaKota,
-      namaToko,
-      alamat,
-      kodePos,
-      noTelepon,
-      token,
-    } = this.state;
-    if (
-      photo &&
-      namaKota &&
-      namaToko &&
-      alamat &&
-      kodePos &&
-      noTelepon &&
-      token !== ''
-    ) {
+    const {name, description, alamat, photo} = this.state;
+    if (name && description && alamat && photo !== '') {
       const product = {
-        nama_toko: namaToko,
+        name: name,
+        description: alamat,
         alamat: alamat,
-        no_telepon: noTelepon,
-        kota: namaKota,
-        kd_pos: kodePos,
       };
       this.setState({loading: true});
-      fetch('http://app-a-store.herokuapp.com/api/store/create', {
+      fetch('http://si--amanah.herokuapp.com/api/shop', {
         method: 'POST',
         body: this.createFormData(photo, product),
         headers: {
+          // 'Content-Type': 'application/json',
           Authorization: `Bearer ${this.state.token}`,
         },
       })
         .then((response) => response.json())
-        .then((response) => {
-          console.log(response);
-          if (response) console.log('Upload produk sukses.', response);
-          alert('Toko telah dibuat!');
-          this.setState({loading: false});
-          this.props.navigation.replace('BottomTab', {screen: 'Home'});
+        .then((responseJSON) => {
+          console.log(responseJSON);
+          if (responseJSON.status != 'Error') {
+            this.succes();
+            this.setState({loading: false});
+            this.props.navigation.replace('BottomTab', {screen: 'Profile'});
+          }
         })
         .catch((error) => {
           console.log('Upload error', error);
-          alert('Gagal ditambahkan');
+          this.failed();
           this.setState({loading: false});
         });
     } else {
-      alert('Harap isi semua form.');
+      this.unfin();
       this.setState({loading: false});
     }
   }
@@ -108,9 +89,49 @@ class OpenStore extends Component {
     });
   };
 
+  succes() {
+    Alert.alert(
+      'Toko Dibuat!',
+      'Mulai bisnis Anda dengan ucapan basmallah.',
+      [
+        {
+          text: 'Ok',
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
+  failed() {
+    Alert.alert(
+      'Terjadi Kesalahan',
+      'Periksa kode Anda.',
+      [
+        {
+          text: 'Ok',
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
+  unfin() {
+    Alert.alert(
+      'Perhatian',
+      'Harap isi semua form.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
   createFormData(photo, body) {
     const data = new FormData();
-    data.append('thumbnail', {
+    data.append('image', {
       name: photo.fileName,
       type: photo.type,
       uri:
@@ -138,7 +159,7 @@ class OpenStore extends Component {
           <TextInput
             style={styles.textInput}
             placeholder="Nama Toko"
-            onChangeText={(input) => this.setState({namaToko: input})}
+            onChangeText={(input) => this.setState({name: input})}
           />
         </View>
         <TouchableOpacity
@@ -155,29 +176,22 @@ class OpenStore extends Component {
         <View style={styles.input}>
           <TextInput
             style={styles.textInput}
+            placeholder="Deskripsi"
+            onChangeText={(input) => this.setState({description: input})}
+          />
+          <TextInput
+            style={styles.textInput}
             placeholder="Alamat Toko"
             onChangeText={(input) => this.setState({alamat: input})}
-          />
-          <TextInput
-            keyboardType={'number-pad'}
-            placeholder="Nomor Telepon"
-            onChangeText={(input) => this.setState({noTelepon: input})}
-          />
-          <TextInput
-            placeholder="Nama Kota"
-            onChangeText={(input) => this.setState({namaKota: input})}
-          />
-          <TextInput
-            keyboardType={'number-pad'}
-            placeholder="Kode Pos"
-            onChangeText={(input) => this.setState({kodePos: input})}
           />
         </View>
         <View style={styles.viewOption}>
           <TouchableOpacity
             style={styles.touchOption}
-            onPress={() => this.props.navigation.goBack()}>
-            <Text style={styles.text}> Batal </Text>
+            onPress={() =>
+              this.props.navigation.replace('BottomTab', {screen: 'Profil'})
+            }>
+            <Text style={styles.text}>Batal</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.touchOption1}
@@ -185,7 +199,7 @@ class OpenStore extends Component {
             {this.state.loading ? (
               <ActivityIndicator size="small" color="grey" />
             ) : (
-              <Text style={styles.text}> Lanjut </Text>
+              <Text style={styles.text}>Lanjut</Text>
             )}
           </TouchableOpacity>
         </View>

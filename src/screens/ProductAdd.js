@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
   Picker,
+  Alert,
 } from 'react-native';
 
 class ProfileEdit extends Component {
@@ -45,6 +46,7 @@ class ProfileEdit extends Component {
   }
 
   getCategory() {
+    console.log('mengambil kategori..');
     fetch('http://si--amanah.herokuapp.com/api/category', {
       method: 'GET',
       headers: {
@@ -56,7 +58,6 @@ class ProfileEdit extends Component {
       .then((responseJson) => {
         this.setState({category: responseJson.data});
         console.log(responseJson.data);
-        console.log('selesai.');
       })
       .catch((err) => {
         console.log(err);
@@ -101,7 +102,7 @@ class ProfileEdit extends Component {
         .then((response) => response.json())
         .then((response) => {
           if (response) this.setState({loading: false});
-          alert('Barang telah ditambahkan!');
+          this.alert();
           console.log(response);
           this.props.navigation.replace('BottomTab', {screen: 'Profile'});
         })
@@ -143,6 +144,20 @@ class ProfileEdit extends Component {
       }
     });
   };
+
+  alert() {
+    Alert.alert(
+      'Sukses',
+      'Barang telah ditambahkan.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
 
   render() {
     return (
@@ -218,12 +233,21 @@ class ProfileEdit extends Component {
               style={styles.textInput}
             />
             <Text>Harga</Text>
-            <TextInput
-              keyboardType="number-pad"
-              placeholder="eg. Rp.50.000,-"
-              onChangeText={(input) => this.setState({price: input})}
-              style={styles.textInput}
-            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={{fontSize: 20}}>Rp.</Text>
+              <TextInput
+                keyboardType="number-pad"
+                placeholder="eg. Rp.50.000,-"
+                onChangeText={(input) => this.setState({price: input})}
+                style={styles.textInput3}
+              />
+              <Text style={{fontSize: 20}}> ,-</Text>
+            </View>
           </View>
           <View
             style={{
@@ -322,7 +346,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   touchEdit2: {
-    width: 160,
+    width: 158,
     height: 50,
     paddingHorizontal: 10,
     justifyContent: 'center',
@@ -358,6 +382,16 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginTop: 5,
     width: 150,
+  },
+  textInput3: {
+    flex: 1,
+    borderColor: 'black',
+    borderWidth: 2,
+    paddingHorizontal: 10,
+    marginHorizontal: 10,
+    height: 40,
+    marginBottom: 15,
+    marginTop: 5,
   },
   textPlus: {
     alignSelf: 'center',

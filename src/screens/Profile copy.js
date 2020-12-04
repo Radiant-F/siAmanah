@@ -20,7 +20,9 @@ class Profile extends Component {
     this.state = {
       token: '',
       dataSource: [],
-      user: '',
+      user: [],
+      modal: false,
+      photo: '',
       loading: false,
     };
   }
@@ -35,26 +37,6 @@ class Profile extends Component {
         console.log('Tidak ada token. User harus login.');
       }
     });
-  }
-
-  getUser() {
-    console.log('sedang mengambil user..');
-    fetch('http://si--amanah.herokuapp.com/api/profile', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.state.token}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({user: responseJson.data});
-        console.log(this.state.user);
-        this.getUserProduct();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
   }
 
   getUserProduct() {
@@ -86,131 +68,198 @@ class Profile extends Component {
       });
   }
 
+  getUser() {
+    console.log('sedang mengambil user..');
+    fetch('http://si--amanah.herokuapp.com/api/profile', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({user: responseJson.data});
+        console.log(responseJson.data);
+        this.getUserProduct();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  createFormData(photo, body) {
+    const data = new FormData();
+    data.append('image', {
+      name: photo.fileName,
+      type: photo.type,
+      uri:
+        Platform.OS === 'android'
+          ? photo.uri
+          : photo.uri.replace('file://', ''),
+    });
+    Object.keys(body).forEach((key) => {
+      data.append(key, body[key]);
+    });
+    return data;
+  }
+
+  handleChoosePhoto = () => {
+    const options = {
+      noData: true,
+    };
+    ImagePicker.launchImageLibrary(options, (response) => {
+      if (response.uri) {
+        this.setState({photo: response});
+      }
+    });
+  };
+
   render() {
     return (
       <View style={{flex: 1}}>
-        <View style={styles.header}>
-          <ImageBackground
-            source={require('../assets/headerProfile.png')}
-            style={styles.headerBg}>
-            <Image
-              source={require('../assets/user-account-box.png')}
-              style={styles.headerIcon}
-            />
-            {this.state.user == '' ? (
-              <Text style={styles.headerText}>Halo, pengunjung.</Text>
-            ) : (
+        {this.state.token != '' ? (
+          <View style={styles.header}>
+            <ImageBackground
+              source={require('../assets/headerProfile.png')}
+              style={styles.headerBg}>
+              <Image
+                source={require('../assets/user-account-box.png')}
+                style={styles.headerIcon}
+              />
               <Text style={styles.headerText}>
                 Halo, {this.state.user.name}.
               </Text>
-            )}
-            <TouchableOpacity
-              onPress={() =>
-                this.props.navigation.replace('ProfileEdit', {
-                  data: this.state.user,
-                })
-              }>
+              <TouchableOpacity
+                onPress={() =>
+                  this.props.navigation.replace('ProfileEdit', {
+                    data: this.state.user,
+                  })
+                }>
+                <Image
+                  source={require('../assets/settings-cogwheel-button.png')}
+                  style={styles.headerIcon}
+                />
+              </TouchableOpacity>
+            </ImageBackground>
+          </View>
+        ) : (
+          <View style={styles.header}>
+            <ImageBackground
+              source={require('../assets/headerProfile.png')}
+              style={styles.headerBg}>
               <Image
-                source={require('../assets/settings-cogwheel-button.png')}
+                source={require('../assets/user-account-box.png')}
                 style={styles.headerIcon}
               />
-            </TouchableOpacity>
-          </ImageBackground>
-        </View>
+              <Text style={styles.headerText}>Halo, pengunjung.</Text>
+            </ImageBackground>
+          </View>
+        )}
         <ImageBackground
           source={require('../assets/profileBg.png')}
           style={styles.BG}>
-          <View style={styles.viewBG}>
-            {this.state.user == '' ? (
-              <View style={styles.viewLottie}>
-                <LottieView
-                  source={require('../assets/8205-loading-animation.json')}
-                  autoPlay={true}
-                  style={{height: 120}}
-                />
+          {this.state.token == '' ? (
+            <View style={{alignItems: 'center'}}>
+              <View style={styles.viewIntro}>
+                <Text style={{textAlign: 'center'}}>
+                  Selamat datang di toko siAmanah! harap masuk atau daftar untuk
+                  melihat dashboard Anda.
+                </Text>
               </View>
-            ) : (
-              <View style={styles.viewMainProfile}>
+              <View style={styles.viewBGs}>
                 <TouchableOpacity
-                  onPress={() =>
-                    this.props.navigation.replace('ProfileEdit', {
-                      data: this.state.user,
-                    })
-                  }>
-                  <Image
-                    source={{uri: this.state.user.image}}
-                    style={styles.pp}
-                  />
+                  style={styles.touchRegister2}
+                  onPress={() => this.props.navigation.replace('Login')}>
+                  <Text style={styles.text}> Login </Text>
                 </TouchableOpacity>
-                <Text style={styles.textDataUser}>{this.state.user.name}</Text>
-                <View style={styles.viewTextProfile}>
-                  <View style={styles.viewData}>
-                    <Image
-                      source={require('../assets/black-envelope-email-symbol.png')}
-                      style={styles.iconProfile}
-                    />
-                    <Text style={styles.textProfile}>
-                      {this.state.user.email}
-                    </Text>
-                  </View>
-                  <View style={styles.viewData}>
-                    <Image
-                      source={require('../assets/map-placeholder.png')}
-                      style={styles.iconProfile}
-                    />
-                    <Text style={styles.textProfile}>
-                      {this.state.user.alamat}
-                    </Text>
-                  </View>
-                  <View style={styles.viewData2}>
-                    <Image
-                      source={require('../assets/phone-working-indicator.png')}
-                      style={styles.iconProfile}
-                    />
-                    <Text style={styles.textProfile}>
-                      {this.state.user.nomor_telpon}
-                    </Text>
-                  </View>
+                <TouchableOpacity
+                  style={styles.touchRegister}
+                  onPress={() => this.props.navigation.replace('Register')}>
+                  <Text style={styles.text}> Register </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <View
+              style={{
+                width: '95%',
+                alignItems: 'center',
+              }}>
+              {this.state.user == '' ? (
+                <View style={styles.viewLottie}>
+                  <LottieView
+                    source={require('../assets/8205-loading-animation.json')}
+                    autoPlay={true}
+                    style={{height: 120, alignItems: 'center'}}
+                  />
                 </View>
-                <View style={styles.viewMyProduct}>
-                  <Text style={styles.textProduct}> Produk Anda: </Text>
-                  <View style={styles.viewProdukUser}>
-                    <ScrollView horizontal={true}>
-                      {this.state.user.role == null ? (
-                        <TouchableOpacity
-                          style={styles.openStore}
-                          onPress={() =>
-                            this.props.navigation.replace('OpenStore')
-                          }>
-                          <Text style={styles.textOpenStore}>
-                            Buka toko untuk mulai berjualan!
-                          </Text>
-                        </TouchableOpacity>
-                      ) : (
-                        <View>
-                          {this.state.dataSource == '' ? (
+              ) : (
+                <View style={styles.viewBG}>
+                  <TouchableOpacity
+                    style={{justifyContent: 'center', alignItems: 'center'}}
+                    onPress={() =>
+                      this.props.navigation.replace('ProfileEdit', {
+                        data: this.state.user,
+                      })
+                    }>
+                    <Image
+                      source={{uri: this.state.user.image}}
+                      style={styles.pp}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.textDataUser}>
+                    {this.state.user.name}
+                  </Text>
+                  <View style={styles.viewTextProfile}>
+                    <Text style={styles.textProfile}>
+                      Email: {this.state.user.email}
+                    </Text>
+                    <Text style={styles.textProfile}>
+                      Alamat: {this.state.user.alamat}
+                    </Text>
+                    <Text style={styles.textProfile}>
+                      No Telepon: {this.state.user.nomor_telpon}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      width: '100%',
+                      alignItems: 'center',
+                      paddingHorizontal: 10,
+                    }}>
+                    <Text style={styles.textProduct}> Produk Anda: </Text>
+                    <View style={styles.viewProdukUser}>
+                      <ScrollView horizontal={true}>
+                        {this.state.dataSource == '' ? (
+                          <View>
                             <LottieView
                               source={require('../assets/629-empty-box.json')}
                               autoPlay={true}
-                              style={{height: 100}}
+                              style={{height: 120}}
                             />
-                          ) : (
-                            <View style={styles.subViewDataProduk}>
-                              {this.state.dataSource.map((value, index) => (
+                          </View>
+                        ) : (
+                          <View style={styles.viewDataProduk}>
+                            {this.state.dataSource.map((value, index) => (
+                              <View
+                                key={index}
+                                style={styles.subViewDataProduk}>
                                 <TouchableOpacity
-                                  style={styles.viewDataProduk}
-                                  key={index}
                                   onPress={() =>
                                     this.props.navigation.replace(
                                       'EditProduct',
-                                      {
-                                        data: value,
-                                      },
+                                      {data: value},
                                     )
                                   }>
                                   <Image
                                     source={{uri: value.image}}
-                                    style={styles.imgMyProduct}
+                                    style={{
+                                      width: 85,
+                                      height: 85,
+                                      borderRadius: 5,
+                                      alignSelf: 'center',
+                                    }}
                                   />
                                   <Text
                                     numberOfLines={1}
@@ -218,37 +267,38 @@ class Profile extends Component {
                                     {value.name}
                                   </Text>
                                 </TouchableOpacity>
-                              ))}
-                            </View>
-                          )}
-                        </View>
-                      )}
-                    </ScrollView>
-                  </View>
-                  {this.state.user.role != null ? (
-                    <View style={styles.viewButton}>
+                              </View>
+                            ))}
+                          </View>
+                        )}
+                      </ScrollView>
+                    </View>
+                    <View
+                      style={{
+                        width: '100%',
+                        flexDirection: 'row',
+                        justifyContent: 'space-evenly',
+                      }}>
                       <TouchableOpacity
                         style={styles.touchToko}
                         onPress={() =>
                           this.props.navigation.replace('PesananPenjual')
                         }>
-                        <Text style={styles.text}>Pesanan</Text>
+                        <Text style={styles.text}> Pesanan </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={styles.touchToko}
                         onPress={() =>
                           this.props.navigation.replace('AddProduct')
                         }>
-                        <Text style={styles.text}>Tambah Produk</Text>
+                        <Text style={styles.text}> Tambah Produk </Text>
                       </TouchableOpacity>
                     </View>
-                  ) : (
-                    <View style={{marginTop: 20}}></View>
-                  )}
+                  </View>
                 </View>
-              </View>
-            )}
-          </View>
+              )}
+            </View>
+          )}
         </ImageBackground>
       </View>
     );
@@ -259,6 +309,8 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#4EC5F1',
     alignItems: 'center',
+    // paddingHorizontal: 20,
+    // flexDirection: 'row',
   },
   headerBg: {
     paddingHorizontal: 15,
@@ -283,27 +335,15 @@ const styles = StyleSheet.create({
   BG: {
     width: '100%',
     height: '100%',
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
   },
   viewBG: {
     backgroundColor: 'white',
     borderRadius: 10,
     elevation: 5,
+    alignItems: 'center',
     width: '95%',
-  },
-  viewMainProfile: {
-    alignItems: 'center',
-  },
-  viewData: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  viewData2: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
   },
   viewBGs: {
     backgroundColor: 'white',
@@ -323,11 +363,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 5,
     padding: 15,
-  },
-  iconProfile: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
   },
   pp: {
     width: 120,
@@ -355,13 +390,17 @@ const styles = StyleSheet.create({
     fontSize: 25,
     marginVertical: 5,
   },
+  textProfile: {},
   viewTextProfile: {
-    paddingVertical: 5,
-    paddingHorizontal: 15,
     alignSelf: 'flex-start',
     width: '100%',
-    borderBottomWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
     borderTopWidth: 1,
+    borderTopColor: 'black',
+    borderBottomWidth: 1,
+    borderBottomColor: 'black',
+    marginBottom: 10,
   },
   touchLogInOut: {
     width: 155,
@@ -404,7 +443,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'black',
     alignSelf: 'flex-start',
-    marginVertical: 5,
   },
   text: {
     fontSize: 15,
@@ -417,66 +455,36 @@ const styles = StyleSheet.create({
     },
   },
   viewProdukUser: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'white',
     width: '100%',
     height: 135,
     borderRadius: 5,
     padding: 10,
-    elevation: 5,
+    marginVertical: 15,
+    elevation: 2,
     alignItems: 'center',
   },
   viewDataProduk: {
-    backgroundColor: '#00000026',
-    marginRight: 5,
-    padding: 5,
-    borderRadius: 5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 105,
+    flexDirection: 'row',
   },
   subViewDataProduk: {
-    flexDirection: 'row',
+    width: 100,
+    backgroundColor: '#00000026',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 5,
+    borderRadius: 5,
+    padding: 5,
   },
   textDataProduk: {
     textAlign: 'center',
   },
   viewLottie: {
-    alignSelf: 'center',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'white',
     borderRadius: 10,
-    width: '100%',
-  },
-  viewMyProduct: {
-    width: '100%',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-  },
-  imgMyProduct: {
-    width: 85,
-    height: 85,
-    borderRadius: 5,
-    alignSelf: 'center',
-  },
-  viewButton: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    marginTop: 10,
-  },
-  openStore: {
-    backgroundColor: '#4EC5F1',
-    height: 55,
-    borderRadius: 5,
-    paddingHorizontal: 15,
-    alignSelf: 'center',
-  },
-  textOpenStore: {
-    textAlign: 'center',
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 18,
-    marginTop: 15,
+    width: '95%',
   },
 });
 

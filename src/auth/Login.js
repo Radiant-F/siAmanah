@@ -9,6 +9,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 import LottieView from 'lottie-react-native';
 
@@ -55,7 +57,7 @@ class Login extends Component {
             this.props.navigation.replace('BottomTab', {screen: 'Home'});
           } else {
             this.setState({loading: false});
-            alert('Pastikan data terisi dengan benar.');
+            this.alert();
           }
         })
         .catch((err) => {
@@ -63,8 +65,22 @@ class Login extends Component {
           alert('Terjadi kesalahan. ' + err);
         });
     } else {
-      alert('Harap diisi.');
+      ToastAndroid.show('Harap isi semua form', ToastAndroid.SHORT);
     }
+  }
+
+  alert() {
+    Alert.alert(
+      'Perhatian',
+      'Pastikan data terisi dengan benar!',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
   }
 
   render() {

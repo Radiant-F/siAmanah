@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import LottieView from 'lottie-react-native';
 import React, {Component} from 'react';
-import Pusher from 'pusher-js/react-native';
 import {
   Image,
   ScrollView,
@@ -14,47 +13,41 @@ import {
   TextInput,
 } from 'react-native';
 
-class ChatScreen extends Component {
+class ChatScreen2 extends Component {
   constructor() {
     super();
     this.state = {
-      user: '',
       sellerName: '',
       receiver_id: '',
-      text: '',
+      messages: '',
       token: '',
-      history: [],
+      pesan: [],
+      message: [],
+      allMessage: [],
+      user: '',
       loading: false,
     };
   }
 
   componentDidMount() {
-    this.getToken();
-    Pusher.logToConsole = true;
-    var pusher = new Pusher('714107c06ab063eee783', {
-      cluster: 'ap1',
-    });
-    var channel = pusher.subscribe('my-channel');
-    channel.bind('my-event', (data) => {
-      // alert(JSON.stringify(data));
-      this.getMessage();
-    });
-  }
-
-  getToken() {
     AsyncStorage.getItem('token')
       .then((value) => {
         if (value != null) {
-          this.setState({token: value});
+          this.setState({
+            token: value,
+            receiver_id: this.props.route.params.data.id,
+          });
+          console.log('token tersedia');
           this.getUser();
-          this.getMessage();
+        } else {
+          console.log('token hilang');
         }
       })
       .catch((err) => console.log('Terjadi kesalahan. ' + err));
   }
 
   getUser() {
-    console.log('mengambil data..');
+    console.log('mengambil id user..');
     fetch('http://si--amanah.herokuapp.com/api/profile', {
       method: 'GET',
       headers: {
@@ -64,36 +57,34 @@ class ChatScreen extends Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        this.setState({
-          user: responseJson.data,
-        });
-        console.log('ID user saat ini: ' + this.state.user.id);
-        console.log('nama penjual: ' + this.props.route.params.data.id);
-        console.log('ID penjual: ' + this.state.receiver_id);
+        this.setState({user: responseJson.data.id});
+        console.log('id user saat ini: ' + this.state.user);
+        this.getPesan();
       })
       .catch((err) => {
         console.log('Terjadi kesalahan. ' + err);
       });
   }
 
-  getMessage() {
-    console.log('sedang mengambil chat..');
-    fetch(
-      `http://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.state.token}`,
-        },
+  getPesan() {
+    console.log('mengambil chat..');
+    fetch(`http://si--amanah.herokuapp.com/api/allmessage`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
       },
-    )
+    })
       .then((response) => response.json())
-      .then((response) => {
-        let riwayat = response.data;
-        riwayat.sort((a, b) => a.id - b.id);
-        this.setState({history: riwayat, loading: false});
-        console.log(riwayat);
+      .then((responseJson) => {
+        // let semuaPesan = responseJson.data.Message.concat(
+        //   responseJson.data.pesan,
+        // );
+        // semuaPesan.sort((a, b) => a.id - b.id);
+        this.setState({
+          allMessage: responseJson.data,
+        });
+        console.log('All message ', this.state.allMessage);
       })
       .catch((err) => {
         console.log('Terjadi kesalahan. ' + err);
@@ -101,28 +92,26 @@ class ChatScreen extends Component {
   }
 
   sendMessage() {
-    if (this.state.text != '') {
-      this.setState({loading: true, text: ''});
+    if (this.state.messages != '') {
+      const {messages, receiver_id} = this.state;
+      const kirimData = {message: messages, receiver_id: receiver_id};
+      this.setState({loading: true, messages: ''});
       console.log('sedang mengirim pesan..');
-      fetch(
-        `http://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.state.token}`,
-          },
-          body: JSON.stringify({message: this.state.text}),
+      fetch(`http://si--amanah.herokuapp.com/api/message`, {
+        method: 'POST',
+        body: JSON.stringify(kirimData),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.state.token}`,
         },
-      )
-        .then((response) => response.json())
+      })
+        .then((response) => response.text())
         .then((responseJSON) => {
-          console.log(responseJSON.data);
           const {status} = responseJSON;
           if (status != 'error') {
             this.setState({loading: false});
-            console.log('pesan terkirim');
-            this.getMessage();
+            console.log('pesan terkirim.');
+            this.getPesan();
           } else {
             this.setState({loading: false});
             console.log('pesan gagal terkirim.');
@@ -137,24 +126,8 @@ class ChatScreen extends Component {
     }
   }
 
-  loop() {
-    var element = [];
-    for (var index = 0; index < this.state.history.length; index++) {
-      element.push(
-        <View key={'container' + index}>
-          {/* <Text key={'author' + index}>{this.state.history[index].name}</Text> */}
-          <Text key={index} style={styles.viewMessageRight}>
-            {this.state.history[index].message}
-          </Text>
-        </View>,
-      );
-    }
-    return element;
-  }
-
   render() {
-    const {data} = this.props.route.params;
-    var myloop = this.loop();
+    // console.log('ini dari render: ', this.state.allMessage[0].message);
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>
@@ -172,8 +145,8 @@ class ChatScreen extends Component {
             </Text>
           </ImageBackground>
         </View>
-        <ScrollView snapToEnd={true}>
-          {this.state.history == '' ? (
+        <ScrollView>
+          {this.state.allMessage.length == 0 ? (
             <View style={styles.viewLoading}>
               <LottieView
                 autoPlay
@@ -183,30 +156,48 @@ class ChatScreen extends Component {
             </View>
           ) : (
             <View>
-              {this.state.history.map((value, index) => (
+              {/* {this.state.pesan.map((value, index) => (
                 <View key={index} style={styles.viewText}>
-                  {value.to == this.state.user.id ? (
-                    <View style={styles.viewMessageLeft}>
-                      <Text style={styles.textMessage}>{value.message}</Text>
-                      <Text style={styles.textTime2}>{value.created_at}</Text>
-                    </View>
-                  ) : (
-                    <View style={styles.viewMessageRight}>
-                      <Text style={styles.textMessage}>{value.message}</Text>
-                      <Text style={styles.textTime}>{value.created_at}</Text>
-                    </View>
-                  )}
+                  <View style={styles.viewMessageLeft}>
+                    <Text>{value.message}</Text>
+                  </View>
                 </View>
               ))}
+              {this.state.message.map((value, index) => (
+                <View key={index} style={styles.viewText}>
+                  <View style={styles.viewMessageRight}>
+                    <Text>{value.message}</Text>
+                  </View>
+                </View>
+              ))} */}
+              {this.state.allMessage.map((value, index) => {
+                if (value.from == this.state.user) {
+                  return (
+                    <View key={index} style={styles.viewText}>
+                      <View style={styles.viewMessageRight}>
+                        <Text>{value.message}</Text>
+                      </View>
+                    </View>
+                  );
+                } else {
+                  return (
+                    <View key={index} style={styles.viewText}>
+                      <View style={styles.viewMessageLeft}>
+                        <Text>{value.message}</Text>
+                      </View>
+                    </View>
+                  );
+                }
+              })}
             </View>
           )}
         </ScrollView>
         <View style={styles.viewSend}>
           <TextInput
-            value={this.state.text}
+            value={this.state.messages}
             placeholder="Tulis Pesan..."
             style={styles.input}
-            onChangeText={(input) => this.setState({text: input})}
+            onChangeText={(input) => this.setState({messages: input})}
           />
           <TouchableOpacity onPress={() => this.sendMessage()}>
             <Image
@@ -224,6 +215,10 @@ class ChatScreen extends Component {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: '#4EC5F1',
+    // height: 60,
+    // alignItems: 'center',
+    // paddingHorizontal: 20,
+    // flexDirection: 'row',
   },
   headerBg: {
     paddingHorizontal: 15,
@@ -270,23 +265,21 @@ const styles = StyleSheet.create({
   viewMessageRight: {
     backgroundColor: '#ff9d5c',
     alignSelf: 'flex-end',
-    paddingHorizontal: 5,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 10,
     elevation: 2,
-    maxWidth: '80%',
   },
   viewMessageLeft: {
     backgroundColor: '#fff',
     alignSelf: 'flex-start',
-    paddingHorizontal: 5,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 10,
     elevation: 2,
-    maxWidth: '80%',
   },
   viewLoading: {
     backgroundColor: 'white',
     alignItems: 'center',
-    // paddingHorizontal: 10,
+    paddingHorizontal: 10,
     borderRadius: 10,
     alignSelf: 'center',
     elevation: 1,
@@ -294,23 +287,6 @@ const styles = StyleSheet.create({
     margin: 10,
     width: '95%',
   },
-  textTime: {
-    alignSelf: 'flex-end',
-    color: 'grey',
-    fontWeight: 'bold',
-    fontSize: 10,
-    margin: 5,
-  },
-  textTime2: {
-    color: 'grey',
-    fontWeight: 'bold',
-    fontSize: 10,
-    margin: 5,
-  },
-  textMessage: {
-    marginHorizontal: 5,
-    marginTop: 5,
-  },
 });
 
-export default ChatScreen;
+export default ChatScreen2;

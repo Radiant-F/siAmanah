@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import LottieView from 'lottie-react-native';
+import _ from 'lodash';
 import React, {Component} from 'react';
 import {
   Text,
@@ -10,6 +11,7 @@ import {
   Image,
   TouchableOpacity,
   Button,
+  Alert,
 } from 'react-native';
 
 export default class PesananPenjual extends Component {
@@ -18,7 +20,14 @@ export default class PesananPenjual extends Component {
     this.state = {
       token: '',
       dataSource: [],
+      idConfirm: '',
+      loading: false,
+      status: '',
     };
+  }
+
+  toPrice(price) {
+    return _.replace(price, /\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
   componentDidMount() {
@@ -35,7 +44,7 @@ export default class PesananPenjual extends Component {
 
   getOrder() {
     console.log('sedang mengambil pesanan..');
-    fetch('http://si--amanah.herokuapp.com/api/gasorder/', {
+    fetch('http://si--amanah.herokuapp.com/api/gasorder', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -44,18 +53,61 @@ export default class PesananPenjual extends Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        // console.log(responseJson);
-        this.setState({dataSource: responseJson.data});
-        console.log(this.state.dataSource);
+        let semuaData = responseJson.data;
+        semuaData.sort((a, b) => b.id - a.id);
+        this.setState({
+          dataSource: semuaData,
+          idConfirm: responseJson.data[0].id,
+          status: responseJson.data[0].status,
+        });
+        console.log('ID untuk konfirmasi pesanan: ' + this.state.idConfirm);
       })
       .catch((err) => {
         console.log(err);
       });
   }
 
-  confirmOrder() {}
+  confirmOrder(id) {
+    this.setState({loading: true, dataSource: ''});
+    fetch(`http://si--amanah.herokuapp.com/api/send/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJSON) => {
+        console.log(responseJSON);
+        if (responseJSON.status == 'Success') {
+          console.log(responseJSON);
+          this.alert();
+          this.getOrder();
+          this.setState({loading: false});
+        } else {
+          this.setState({loading: false});
+          alert('Gagal dikonfirmasi.');
+        }
+      })
+      .catch((err) => {
+        this.setState({loading: false});
+        alert('Terjadi kesalahan. ' + err);
+      });
+  }
 
-  abortOrder() {}
+  alert() {
+    Alert.alert(
+      'Sukses',
+      'Pesanan telah anda konfirmasi. Barang akan dikirim kepada pembeli.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
 
   render() {
     return (
@@ -98,12 +150,36 @@ export default class PesananPenjual extends Component {
                       <View style={styles.viewText}>
                         <Text style={styles.name}>{value.product.name}</Text>
                         <Text>Jumlah pesanan: {value.jumlah}</Text>
-                        <Text>Jumlah harga: Rp.{value.jumlah_harga},-</Text>
-                        <Text>ID pembeli: {value.order.customer_id}</Text>
+                        <Text>
+                          Jumlah harga:{' '}
+                          <Text style={{color: 'green', fontWeight: 'bold'}}>
+                            Rp.{this.toPrice(value.jumlah_harga)},-
+                          </Text>
+                        </Text>
+                        {value.status != 2 ? (
+                          <View>
+                            <Text>
+                              Status:{' '}
+                              <Text style={{color: 'tomato'}}>
+                                belum dikonfirmasi.
+                              </Text>{' '}
+                            </Text>
+                          </View>
+                        ) : (
+                          <View>
+                            <Text>
+                              Status:{' '}
+                              <Text style={{color: 'green'}}>
+                                dikonfirmasi.
+                              </Text>
+                            </Text>
+                          </View>
+                        )}
                       </View>
                     </View>
                     <View style={styles.viewButton}>
                       <Button
+                        color="orange"
                         title="Lihat bukti pembayaran"
                         onPress={() =>
                           this.props.navigation.navigate('Nota', {
@@ -111,6 +187,16 @@ export default class PesananPenjual extends Component {
                           })
                         }
                       />
+                      {value.status != 2 ? (
+                        <Button
+                          title="Konfirmasi"
+                          onPress={() => this.confirmOrder(value.id)}
+                        />
+                      ) : (
+                        <View style={styles.viewConfirmed}>
+                          <Text style={{color: 'white'}}>Dikonfirmasi</Text>
+                        </View>
+                      )}
                     </View>
                   </View>
                 ))}
@@ -191,7 +277,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   viewButton: {
-    marginVertical: 5,
+    marginBottom: 25,
+    marginTop: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
   },
   viewPesanan: {
     flexDirection: 'row',
@@ -216,5 +305,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     borderBottomColor: 'black',
     borderBottomWidth: 1,
+  },
+  viewConfirmed: {
+    backgroundColor: 'grey',
+    paddingHorizontal: 10,
+    borderRadius: 2,
+    elevation: 2,
+    justifyContent: 'center',
   },
 });

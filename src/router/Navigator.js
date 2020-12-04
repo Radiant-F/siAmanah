@@ -10,13 +10,9 @@ import Recovery from '../auth/Recovery';
 import Onboard from '../components/Onboard';
 import Splash from '../components/Splash';
 import Chat from '../screens/Chat';
-import Favorite from '../screens/Favorite';
-import ScreenAntique from '../screens/categories/ScreenAntique';
 import ScreenBooks from '../screens/categories/ScreenBooks';
 import ScreenClothes from '../screens/categories/ScreenClothes';
 import ScreenElektronics from '../screens/categories/ScreenElektronics';
-import ScreenFoods from '../screens/categories/ScreenFoods';
-import ScreenFurniture from '../screens/categories/ScreenFurniture';
 import DetailProduct from '../screens/ProductDetail';
 import OpenStore from '../screens/OpenStore';
 import ProfileEdit from '../screens/ProfileEdit';
@@ -26,6 +22,7 @@ import PesananPenjual from '../screens/PesananPenjual';
 import ChatScreen from '../screens/ChatScreen';
 import Nota from '../screens/Nota';
 import DetailOrder from '../screens/topTab/BOrderDetail';
+import ProductSearch from '../screens/ProductSearch';
 
 const Stack = createStackNavigator();
 
@@ -40,13 +37,9 @@ const Navigator = () => {
         <Stack.Screen name="Recovery" component={Recovery} />
         <Stack.Screen name="BottomTab" component={BottomTab} />
         <Stack.Screen name="Chat" component={Chat} />
-        <Stack.Screen name="Favorite" component={Favorite} />
-        <Stack.Screen name="Antique" component={ScreenAntique} />
         <Stack.Screen name="Books" component={ScreenBooks} />
         <Stack.Screen name="Clothes" component={ScreenClothes} />
         <Stack.Screen name="Electronics" component={ScreenElektronics} />
-        <Stack.Screen name="Foods" component={ScreenFoods} />
-        <Stack.Screen name="Furnitures" component={ScreenFurniture} />
         <Stack.Screen name="Detail" component={DetailProduct} />
         <Stack.Screen name="OpenStore" component={OpenStore} />
         <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
@@ -56,6 +49,7 @@ const Navigator = () => {
         <Stack.Screen name="ChatScreen" component={ChatScreen} />
         <Stack.Screen name="Nota" component={Nota} />
         <Stack.Screen name="OrderDetail" component={DetailOrder} />
+        <Stack.Screen name="ProductSearch" component={ProductSearch} />
       </Stack.Navigator>
     </NavigationContainer>
   );

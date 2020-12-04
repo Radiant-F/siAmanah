@@ -10,8 +10,8 @@ const TopTab = () => {
   return (
     <Tabs.Navigator>
       <Tabs.Screen name="Keranjang" component={Cart} />
-      <Tabs.Screen name="Status" component={Status} />
-      <Tabs.Screen name="Histori" component={Histori} />
+      <Tabs.Screen name="Pembayaran" component={Status} />
+      <Tabs.Screen name="Status" component={Histori} />
     </Tabs.Navigator>
   );
 };

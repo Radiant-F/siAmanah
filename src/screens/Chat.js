@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-community/async-storage';
+import LottieView from 'lottie-react-native';
 import React, {Component} from 'react';
 import {
   Image,
@@ -11,6 +13,82 @@ import {
 } from 'react-native';
 
 class Chat extends Component {
+  constructor() {
+    super();
+    this.state = {
+      token: '',
+      user: [],
+      data: '',
+    };
+    AsyncStorage.getItem('token').then((value) => {
+      if (value != null) {
+        this.setState({token: value});
+        console.log('Token tersedia');
+        this.getUser();
+      } else {
+        console.log('Token tidak ada');
+      }
+    });
+  }
+
+  getUser() {
+    console.log('mengambil ID user..');
+    fetch('http://si--amanah.herokuapp.com/api/profile', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({user: responseJson.data});
+        console.log('ID user saat ini: ' + this.state.user.id);
+        this.getAllUser();
+      })
+      .catch((err) => {
+        console.log('Terjadi kesalahan. ' + err);
+      });
+  }
+
+  getAllUser() {
+    console.log('mengambil chat..');
+    fetch(`http://si--amanah.herokuapp.com/api/allmessage`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({data: responseJson.data});
+        console.log(this.state.data);
+      })
+      .catch((err) => {
+        console.log('Terjadi kesalahan. ' + err);
+      });
+  }
+
+  getMessage() {
+    console.log('sedang mengambil chat..');
+    fetch(`http://si--amanah.herokuapp.com/api/message/${this.state.user.id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({data: responseJson[0]});
+        console.log(this.state.data);
+      })
+      .catch((err) => {
+        console.log('Terjadi kesalahan. ' + err);
+      });
+  }
+
   render() {
     return (
       <View style={{flex: 1}}>
@@ -26,23 +104,60 @@ class Chat extends Component {
           </ImageBackground>
         </View>
         <ScrollView>
-          {/* MAPPING START HERE */}
-          <View>
+          {this.state.data == '' ? (
+            <View style={styles.viewLoading}>
+              <LottieView
+                autoPlay
+                style={{width: 120}}
+                source={require('../assets/16289-no-comments.json')}
+              />
+            </View>
+          ) : (
+            <View>
+              {this.state.data.map((value, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.viewChat}
+                  onPress={() =>
+                    this.props.navigation.navigate('ChatScreen', {data: value})
+                  }>
+                  <Image source={{uri: value.image}} style={styles.imgPp} />
+                  <View style={styles.viewTextChat}>
+                    <Text style={styles.textName}>{value.name}</Text>
+                    <Text>Pesan terakhir</Text>
+                  </View>
+                  <Text>Waktu</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          {/* {this.state.data == '' ? (
+            <View style={styles.viewLoading}>
+              <LottieView
+                autoPlay
+                style={{width: 120}}
+                source={require('../assets/16289-no-comments.json')}
+              />
+            </View>
+          ) : (
             <TouchableOpacity
               style={styles.viewChat}
-              onPress={() => this.props.navigation.navigate('ChatScreen')}>
+              onPress={() =>
+                this.props.navigation.navigate('ChatScreen2', {
+                  data: this.state.data,
+                })
+              }>
               <Image
-                source={require('../assets/aku.jpg')}
+                source={{uri: this.state.data.image}}
                 style={styles.imgPp}
               />
               <View style={styles.viewTextChat}>
-                <Text style={styles.textName}>Nama</Text>
+                <Text style={styles.textName}>{this.state.data}</Text>
                 <Text>Pesan terakhir</Text>
               </View>
               <Text>Waktu</Text>
             </TouchableOpacity>
-          </View>
-          {/* END OF MAPPING */}
+          )} */}
         </ScrollView>
       </View>
     );
@@ -52,10 +167,6 @@ class Chat extends Component {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: '#4EC5F1',
-    // height: 60,
-    // alignItems: 'center',
-    // paddingHorizontal: 20,
-    // flexDirection: 'row',
   },
   headerBg: {
     paddingHorizontal: 15,
@@ -96,6 +207,16 @@ const styles = StyleSheet.create({
   },
   textName: {
     fontSize: 20,
+  },
+  viewLoading: {
+    backgroundColor: 'white',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignSelf: 'center',
+    width: '95%',
+    elevation: 2,
+    marginVertical: 10,
   },
 });
 

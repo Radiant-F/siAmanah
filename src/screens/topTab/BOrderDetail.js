@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import LottieView from 'lottie-react-native';
+import _ from 'lodash';
 import React, {Component} from 'react';
 import {
   Button,
@@ -9,6 +10,7 @@ import {
   View,
   ImageBackground,
   Image,
+  Alert,
 } from 'react-native';
 
 class DetailOrder extends Component {
@@ -24,20 +26,26 @@ class DetailOrder extends Component {
     };
   }
 
+  toPrice(price) {
+    return _.replace(price, /\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
   componentDidMount() {
     AsyncStorage.getItem('token').then((value) => {
       if (value != null) {
         this.setState({token: value});
         console.log('Token tersedia.');
-        this.confirmPayment();
+        this.confirmedPayment();
       } else {
         console.log('Token hilang.');
       }
     });
   }
 
-  confirmPayment() {
-    console.log('Mengambil detail...');
+  confirmedPayment() {
+    console.log(
+      'mengambil detail dari ID ' + this.props.route.params.id + '..',
+    );
     this.setState({loading: true});
     fetch(
       `https://si--amanah.herokuapp.com/api/history/${this.props.route.params.id}`,
@@ -52,20 +60,15 @@ class DetailOrder extends Component {
       .then((response) => response.json())
       .then((responseJson) => {
         JSON.stringify(responseJson);
-        console.log(responseJson);
         if (responseJson.data[0].status != null) {
           this.setState({
             loading: false,
             data: responseJson.data,
-            idSend: responseJson.data[0].id,
-            image: responseJson.data[0].product.image,
-            status: responseJson.data[0].status,
           });
-          console.log(this.state.status);
-          console.log('ID untuk menerima pesanan: ' + this.state.idSend);
+          console.log(this.state.data);
         } else {
           this.setState({loading: false});
-          alert('Harap tunggu konfirmasi penjual.');
+          this.alert();
           this.props.navigation.goBack();
         }
       })
@@ -75,9 +78,10 @@ class DetailOrder extends Component {
       });
   }
 
-  confirmProduct() {
+  confirmProduct(id) {
+    console.log('Mengkonfirmasi...');
     this.setState({loading: true});
-    fetch(`http://si--amanah.herokuapp.com/api/accept/${this.state.idSend}`, {
+    fetch(`http://si--amanah.herokuapp.com/api/accept/${id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -90,8 +94,8 @@ class DetailOrder extends Component {
         if (responseJSON.status == 'Success') {
           console.log(responseJSON);
           this.setState({loading: false});
-          alert('Pesanan telah sampai ke tangan anda.');
-          this.props.navigation.replace('BottomTab');
+          this.alert2();
+          this.confirmedPayment();
         } else {
           this.setState({loading: false});
           alert('Gagal dikonfirmasi.');
@@ -101,6 +105,34 @@ class DetailOrder extends Component {
         this.setState({loading: false});
         alert('Terjadi kesalahan. ' + err);
       });
+  }
+
+  alert() {
+    Alert.alert(
+      'Sabar cuy',
+      'Harap tunggu konfirmasi penjual.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
+  alert2() {
+    Alert.alert(
+      'Mantap!',
+      'Pesanan telah sampai ke tangan anda.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
   }
 
   render() {
@@ -117,42 +149,62 @@ class DetailOrder extends Component {
             <Text style={styles.headerText}>Detail Pesanan</Text>
           </ImageBackground>
         </View>
-        {this.state.data == '' ? (
-          <View style={styles.viewLoading}>
-            <LottieView
-              autoPlay
-              style={{width: 120}}
-              source={require('../../assets/8205-loading-animation.json')}
-            />
-          </View>
-        ) : (
-          <View style={{padding: 5}}>
-            {this.state.data.map((value, index) => (
-              <View key={index} style={styles.viewMain}>
-                <Image source={{uri: this.state.image}} style={styles.image} />
-                <View style={styles.viewText}>
-                  <Text style={styles.name}>{value.product.name}</Text>
-                  <View style={styles.subText}>
-                    <Text>Jumlah pesanan anda: {value.jumlah}</Text>
-                    <Text>Total harga: Rp.{value.jumlah_harga},-</Text>
+        <ScrollView>
+          {this.state.data == '' ? (
+            <View style={styles.viewLoading}>
+              <LottieView
+                autoPlay
+                style={{width: 120}}
+                source={require('../../assets/8205-loading-animation.json')}
+              />
+            </View>
+          ) : (
+            <View style={{padding: 5}}>
+              {this.state.data.map((value, index) => (
+                <View key={index} style={styles.viewMain}>
+                  <Image
+                    source={{uri: value.product.image}}
+                    style={styles.image}
+                  />
+                  <View style={styles.viewText}>
+                    <Text style={styles.name}>{value.product.name}</Text>
+                    <View style={styles.subText}>
+                      <Text>Jumlah pesanan anda: {value.jumlah}</Text>
+                      <Text>
+                        Total harga:{' '}
+                        <Text style={{color: 'green', fontWeight: 'bold'}}>
+                          Rp.{this.toPrice(value.jumlah_harga)},-
+                        </Text>
+                      </Text>
+                    </View>
                   </View>
+                  {value.status == 2 ? (
+                    <View style={styles.button}>
+                      <Button
+                        title="Konfirmasi pesanan"
+                        onPress={() => this.confirmProduct(value.id)}
+                      />
+                    </View>
+                  ) : (
+                    <View
+                      style={{
+                        width: '100%',
+                        backgroundColor: '#00cc1f',
+                        paddingVertical: 9,
+                        elevation: 3,
+                        borderRadius: 1,
+                        marginVertical: 5,
+                      }}>
+                      <Text style={{textAlign: 'center', color: 'white'}}>
+                        Pesanan sudah Anda terima!
+                      </Text>
+                    </View>
+                  )}
                 </View>
-                {this.state.status == '2' ? (
-                  <View style={styles.button}>
-                    <Button
-                      title="Konfirmasi pesanan"
-                      onPress={() => this.confirmProduct()}
-                    />
-                  </View>
-                ) : (
-                  <View>
-                    <Text>Pesanan sudah Anda terima.</Text>
-                  </View>
-                )}
-              </View>
-            ))}
-          </View>
-        )}
+              ))}
+            </View>
+          )}
+        </ScrollView>
       </View>
     );
   }
@@ -165,7 +217,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
     alignSelf: 'center',
-    width: '100%',
+    width: '95%',
+    marginTop: 10,
     padding: 5,
   },
   header: {

@@ -11,6 +11,8 @@ import {
   Button,
   TextInput,
   ScrollView,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 
 export default class CStatus extends Component {
@@ -59,15 +61,15 @@ export default class CStatus extends Component {
             loading: false,
             data: responseJson.data,
           });
-          console.log('Status: ' + this.state.data);
+          console.log('Pembayaran: ' + this.state.data);
         } else {
           this.setState({loading: false});
-          console.log('Status: ' + this.state.data);
+          console.log('Error');
         }
       })
       .catch((err) => {
         this.setState({loading: false});
-        console.log('Status: ' + err);
+        console.log('Terjadi kesalahan: ' + err);
       });
   }
 
@@ -92,11 +94,15 @@ export default class CStatus extends Component {
           console.log(response);
           if (response.status == 'Success') {
             console.log('upload succes', response);
-            alert('Pesanan telah dibayar. Menunggu konfirmasi penjual.');
-            this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
-          } else {
-            alert('Error');
             this.setState({loading: false});
+            this.alert();
+            this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
+          } else if (response.msg == 'nominal kurang') {
+            this.setState({loading: false});
+            this.alert1();
+          } else {
+            this.setState({loading: false});
+            ToastAndroid.show('Harap isi semua form.', ToastAndroid.SHORT);
           }
         })
         .catch((error) => {
@@ -136,6 +142,48 @@ export default class CStatus extends Component {
     });
   };
 
+  alert() {
+    Alert.alert(
+      'Sukses',
+      'Pesanan telah dibayar. Menunggu konfirmasi penjual.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('ok'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
+  alert1() {
+    Alert.alert(
+      'Nominal Kurang',
+      'Nominal yang anda masukan tidak cukup untuk pembayaran.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('ok'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
+  alert2() {
+    Alert.alert(
+      'Perhatian',
+      'Harap kirimkan bukti foto.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('ok'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
   render() {
     return (
       <View style={{flex: 1, padding: 10}}>
@@ -143,7 +191,7 @@ export default class CStatus extends Component {
           {this.state.data == null ? (
             <View style={styles.viewLoading}>
               <LottieView
-                source={require('../../assets/8205-loading-animation.json')}
+                source={require('../../assets/17990-empty-cart.json')}
                 autoPlay={true}
                 style={{height: 120}}
               />
@@ -151,21 +199,17 @@ export default class CStatus extends Component {
           ) : (
             <View>
               <Text style={styles.urOrder}>Pesanan anda:</Text>
-              <View style={{marginRight: 10}}>
+              <ScrollView horizontal={true}>
                 {this.state.data.map((value, index) => (
-                  <ScrollView key={index} horizontal={true}>
-                    <View>
-                      <View style={styles.viewItem}>
-                        <Image
-                          source={{uri: value.product.image}}
-                          style={{width: 100, height: 100}}
-                        />
-                        <Text>{value.product.name}</Text>
-                      </View>
-                    </View>
-                  </ScrollView>
+                  <View key={index} style={styles.viewItem}>
+                    <Image
+                      source={{uri: value.product.image}}
+                      style={{width: 100, height: 100}}
+                    />
+                    <Text>{value.product.name}</Text>
+                  </View>
                 ))}
-              </View>
+              </ScrollView>
               <Text>Kirim bukti pembayaran.</Text>
               <TouchableOpacity
                 style={styles.viewPP}
@@ -182,23 +226,26 @@ export default class CStatus extends Component {
                 )}
               </TouchableOpacity>
               <Text>Konfirmasi nominal yang anda kirim:</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="nominal"
-                onChangeText={(input) => this.setState({amount: input})}
-              />
+              <View style={styles.viewData}>
+                <Text>Rp.</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Nominal"
+                  onChangeText={(input) => this.setState({amount: input})}
+                  keyboardType="number-pad"
+                />
+                <Text>,-</Text>
+              </View>
               <Text>Konfirmasi nama Anda:</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="nama"
-                onChangeText={(input) => this.setState({name: input})}
-              />
-              <Text>Konfirmasi nama penerima:</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="nama penerima"
-                onChangeText={(input) => this.setState({transfer_to: input})}
-              />
+              <View style={styles.viewData}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Nama"
+                  onChangeText={(input) =>
+                    this.setState({name: input, transfer_to: input})
+                  }
+                />
+              </View>
               <Button
                 title="Kirim bukti pembayaran"
                 onPress={() => this.payment()}
@@ -262,15 +309,25 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     elevation: 1,
     marginBottom: 5,
+    marginRight: 5,
   },
 
   textInput: {
-    flex: 1,
-    borderColor: 'black',
-    borderWidth: 2,
+    borderBottomColor: 'black',
+    borderBottomWidth: 2,
     paddingHorizontal: 10,
     height: 40,
     marginBottom: 15,
     marginTop: 5,
+    marginHorizontal: 5,
+  },
+  viewData: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginVertical: 10,
+    elevation: 1,
   },
 });

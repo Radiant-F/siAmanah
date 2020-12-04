@@ -10,6 +10,8 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 
 class Register extends Component {
@@ -25,41 +27,65 @@ class Register extends Component {
   }
 
   Register() {
-    const {name, email, password, confirmPass} = this.state;
-    var dataToSend = {
-      name: name,
-      email: email,
-      password: password,
-      password_confirmation: confirmPass,
-    };
-    this.setState({loading: true});
-    fetch('http://si--amanah.herokuapp.com/api/register', {
-      method: 'POST',
-      body: JSON.stringify(dataToSend),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson);
-        const {token} = responseJson;
-        if (token != null) {
-          AsyncStorage.setItem('token', token);
-          console.log(token);
-          this.setState({loading: false});
-          alert('Registrasi berhasil!');
-          this.props.navigation.replace('BottomTab');
-        } else {
-          console.log(token + '. token tidak ada.');
-          this.setState({loading: false});
-          alert('Pastikan formulir terisi dengan benar.');
-        }
+    if (
+      this.state.name != '' &&
+      this.state.email != '' &&
+      this.state.password != '' &&
+      this.state.confirmPass != ''
+    ) {
+      const {name, email, password, confirmPass} = this.state;
+      var dataToSend = {
+        name: name,
+        email: email,
+        password: password,
+        password_confirmation: confirmPass,
+      };
+      console.log('mendaftar...');
+      this.setState({loading: true});
+      fetch('http://si--amanah.herokuapp.com/api/register', {
+        method: 'POST',
+        body: JSON.stringify(dataToSend),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       })
-      .catch((error) => {
-        this.setState({loading: false});
-        alert('Terjadi kesalahan. ' + error);
-      });
+        .then((response) => response.json())
+        .then((responseJson) => {
+          console.log(responseJson);
+          const {token} = responseJson;
+          if (token != null) {
+            AsyncStorage.setItem('token', token);
+            console.log(token);
+            this.setState({loading: false});
+            this.alert();
+            this.props.navigation.replace('BottomTab');
+          } else {
+            console.log(token + '. token tidak ada.');
+            this.setState({loading: false});
+            alert('Pastikan formulir terisi dengan benar.');
+          }
+        })
+        .catch((error) => {
+          this.setState({loading: false});
+          alert('Terjadi kesalahan. ' + error);
+        });
+    } else {
+      ToastAndroid.show('Harap isi semua form', ToastAndroid.SHORT);
+    }
+  }
+
+  alert() {
+    Alert.alert(
+      'Sukses',
+      'Registrasi berhasil. Selamat berbelanja!',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
   }
 
   render() {

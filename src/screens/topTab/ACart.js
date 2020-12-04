@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import React, {Component} from 'react';
+import _ from 'lodash';
 import LottieView from 'lottie-react-native';
 import {
   ActivityIndicator,
@@ -11,6 +12,8 @@ import {
   Image,
   ScrollView,
   RefreshControl,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 import {TextInput} from 'react-native-gesture-handler';
 
@@ -24,6 +27,10 @@ class Cart extends Component {
       tujuan: '',
       refresh: false,
     };
+  }
+
+  toPrice(price) {
+    return _.replace(price, /\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
   componentDidMount() {
@@ -41,6 +48,7 @@ class Cart extends Component {
   }
 
   getItem() {
+    console.log('mengambil keranjang..');
     this.setState({loading: true});
     fetch(`https://si--amanah.herokuapp.com/api/check-out`, {
       method: 'GET',
@@ -53,26 +61,26 @@ class Cart extends Component {
       .then((responseJson) => {
         JSON.stringify(responseJson);
         if (responseJson.data != null || '') {
-          console.log(responseJson);
           this.setState({
             loading: false,
             cart: responseJson.data,
           });
-          console.log('Cart: ' + this.state.cart);
+          console.log('Keranjang: ' + this.state.cart);
         } else {
           this.setState({loading: false});
-          console.log('Cart: ' + this.state.cart);
+          console.log('Keranjang: ' + this.state.cart);
         }
         this.setState({refresh: false});
       })
       .catch((err) => {
         this.setState({loading: false});
         this.setState({refresh: false});
-        console.log('Cart: ' + err);
+        console.log('Keranjang: ' + err);
       });
   }
 
   deleteProduct(id) {
+    this.setState({loading: true});
     fetch(`https://si--amanah.herokuapp.com/api/check-out/${id}`, {
       method: 'DELETE',
       headers: {
@@ -85,12 +93,15 @@ class Cart extends Component {
         console.log(json);
         const {status} = json;
         if (status == 'Success') {
+          ToastAndroid.show('Barang telah dihapus', ToastAndroid.SHORT);
+          this.setState({loading: false});
           this.getItem();
         } else {
+          this.setState({loading: false});
           alert('Gagal menghapus');
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err), this.setState({loading: false}));
   }
 
   checkOut() {
@@ -113,8 +124,8 @@ class Cart extends Component {
         .then((response) => {
           if (response.status == 'Success') this.setState({loading: false});
           console.log(response);
-          alert('Pesanan Anda telah dibuat! Harap kirim bukti pembayaran.');
-          this.props.navigation.replace('BottomTab', {screen: 'Transaksi'});
+          this.alert();
+          this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
         })
         .catch((error) => {
           this.setState({loading: false});
@@ -127,15 +138,29 @@ class Cart extends Component {
     }
   }
 
+  alert() {
+    Alert.alert(
+      'Sukses!',
+      'Pesanan Anda telah dibuat. Harap kirim bukti pembayaran.',
+      [
+        {
+          text: 'Ok',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
   render() {
     return (
       <View>
-        {this.state.loading ? (
+        {this.state.cart == '' ? (
           <View style={style.viewLoading}>
             <LottieView
-              source={require('../../assets/36215-shopping-cart-animation.json')}
+              source={require('../../assets/17990-empty-cart.json')}
               autoPlay={true}
-              style={{height: 200}}
+              style={{height: 120}}
             />
           </View>
         ) : (
@@ -177,7 +202,7 @@ class Cart extends Component {
                       </Text>
                       <Text>Jumlah harga :</Text>
                       <Text style={style.textPrice}>
-                        Rp.{value.jumlah_harga},-
+                        Rp.{this.toPrice(value.jumlah_harga)},-
                       </Text>
                       <Text>Jumlah pesanan: {value.jumlah}</Text>
                     </View>
@@ -213,7 +238,7 @@ const style = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
     alignSelf: 'center',
-    width: '100%',
+    width: '95%',
     margin: 10,
   },
   viewAdress: {
@@ -236,6 +261,7 @@ const style = StyleSheet.create({
     borderRadius: 10,
     elevation: 2,
     flexDirection: 'row',
+    marginBottom: 5,
   },
   imageOrder: {
     width: 100,
@@ -253,6 +279,7 @@ const style = StyleSheet.create({
   textProduct: {
     fontWeight: 'bold',
     fontSize: 20,
+    paddingRight: 10,
   },
   textPrice: {
     color: 'green',

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import LottieView from 'lottie-react-native';
+import _ from 'lodash';
 import React, {Component} from 'react';
 import {
   Image,
@@ -25,6 +26,10 @@ class Nota extends Component {
     };
   }
 
+  toPrice(price) {
+    return _.replace(price, /\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+
   componentDidMount() {
     AsyncStorage.getItem('token')
       .then((token) => {
@@ -40,6 +45,9 @@ class Nota extends Component {
   }
 
   getNota() {
+    console.log(
+      'Mengambil order id ke ' + this.props.route.params.data.order_id + '..',
+    );
     this.setState({loading: true});
     fetch(
       `https://si--amanah.herokuapp.com/api/payment/${this.props.route.params.data.order_id}`,
@@ -62,47 +70,14 @@ class Nota extends Component {
           console.log(this.state.nota);
         } else {
           this.setState({loading: false});
-          console.log(this.state.nota);
+          console.log('Error');
         }
         this.setState({refresh: false});
       })
       .catch((err) => {
-        console.log(err);
+        console.log('Terjadi kesalahan. ' + err);
         this.setState({loading: false});
         this.setState({refresh: false});
-      });
-  }
-
-  confirm() {
-    this.setState({loading: true});
-    fetch(
-      `http://si--amanah.herokuapp.com/api/send/${this.props.route.params.data.id}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.state.token}`,
-        },
-      },
-    )
-      .then((response) => response.json())
-      .then((responseJSON) => {
-        console.log(responseJSON);
-        if (responseJSON.status == 'Success') {
-          console.log(responseJSON);
-          this.setState({loading: false});
-          alert(
-            'Pesanan telah anda konfirmasi. Barang akan dikirim kepada pembeli.',
-          );
-          this.props.navigation.replace('BottomTab', {screen: 'Profil'});
-        } else {
-          this.setState({loading: false});
-          alert('Gagal dikonfirmasi.');
-        }
-      })
-      .catch((err) => {
-        this.setState({loading: false});
-        alert('Terjadi kesalahan. ' + err);
       });
   }
 
@@ -131,24 +106,32 @@ class Nota extends Component {
         ) : (
           <ScrollView>
             <View style={styles.viewNota}>
-              <Image
-                source={{uri: this.state.nota.bukti}}
-                style={styles.image}
-              />
+              {this.state.nota.bukti != '' ? (
+                <Image
+                  source={{uri: this.state.nota.bukti}}
+                  style={styles.image}
+                />
+              ) : (
+                <View>
+                  <Text>Mengambil nota..</Text>
+                </View>
+              )}
               <View style={styles.text}>
                 <Text>
                   {' '}
                   Jumlah Nominal:
-                  <Text style={{fontWeight: 'bold'}}>
+                  <Text style={{fontWeight: 'bold', color: 'green'}}>
                     {' '}
-                    Rp.{this.state.nota.amount},-
+                    Rp.{this.toPrice(this.state.nota.amount)},-
                   </Text>
                 </Text>
-                <Text> Nama pembeli: {this.state.nota.name} </Text>
-                <Text> Dikirim ke: {this.state.nota.transfer_to} </Text>
-              </View>
-              <View style={styles.button}>
-                <Button title="Konfirmasi" onPress={() => this.confirm()} />
+                <Text>
+                  {' '}
+                  Nama pembeli:{' '}
+                  <Text style={{fontWeight: 'bold'}}>
+                    {this.state.nota.name}
+                  </Text>
+                </Text>
               </View>
             </View>
           </ScrollView>
@@ -208,13 +191,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
     alignSelf: 'center',
-    width: '100%',
     elevation: 2,
-    marginBottom: 10,
+    width: '100%',
   },
   image: {
-    width: 150,
-    height: 150,
+    width: 250,
+    height: 250,
     alignSelf: 'center',
     margin: 10,
     borderRadius: 5,

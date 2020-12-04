@@ -8,7 +8,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  FlatList,
   ScrollView,
+  ScrollViewComponent,
+  TextInput,
   ToastAndroid,
   Alert,
 } from 'react-native';
@@ -21,7 +24,6 @@ export class DetailProduct extends Component {
       dataSource: [],
       loading: false,
       qty: 0,
-      stok: 0,
       idProduk: '',
       idSeller: '',
     };
@@ -38,9 +40,10 @@ export class DetailProduct extends Component {
           token: token,
           idProduk: this.props.route.params.item.id,
           idSeller: this.props.route.params.item.user.id,
+          idSeller: this.props.route.params.item.customer_id,
         });
         console.log('id produk: ' + this.state.idProduk);
-        console.log('data penjual: ', this.props.route.params.item.user);
+        console.log('id penjual: ' + this.state.idSeller);
       } else {
         console.log('Token hilang! Harap login untuk beli barang.');
       }
@@ -60,53 +63,41 @@ export class DetailProduct extends Component {
 
   addCart() {
     if (this.state.qty != 0) {
-      if (
-        this.state.stok + this.state.qty <=
-        this.props.route.params.item.stock
-      ) {
-        console.log('memasukan ke keranjang..');
-        const {qty} = this.state;
-        const kirimData = {jumlah_pesan: qty};
-        this.setState({loading: true});
-        fetch(
-          `http://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
-          {
-            method: 'POST',
-            body: JSON.stringify(kirimData),
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.state.token}`,
-            },
+      const {qty} = this.state;
+      const kirimData = {jumlah_pesan: qty};
+      this.setState({loading: true});
+      fetch(
+        `http://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
+        {
+          method: 'POST',
+          body: JSON.stringify(kirimData),
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.state.token}`,
           },
-        )
-          .then((response) => response.json())
-          .then((responseJSON) => {
-            const {status} = responseJSON;
-            if (status != 'error') {
-              console.log(responseJSON);
-              this.setState({
-                loading: false,
-                stok: this.state.stok + this.state.qty,
-              });
-              console.log('stok dikeranjang: ', this.state.stok);
-              ToastAndroid.show(
-                'Barang telah masuk ke keranjang.',
-                ToastAndroid.SHORT,
-              );
-            } else {
-              this.setState({loading: false});
-              ToastAndroid.show('Harap perhatikan stok.', ToastAndroid.LONG);
-            }
-          })
-          .catch((err) => {
+        },
+      )
+        .then((response) => response.json())
+        .then((responseJSON) => {
+          const {status} = responseJSON;
+          if (status != 'error') {
+            console.log(responseJSON);
             this.setState({loading: false});
-            alert('Terjadi kesalahan. ' + err);
-          });
-      } else {
-        this.overStock();
-      }
+            ToastAndroid.show(
+              'Barang telah masuk ke keranjang.',
+              ToastAndroid.SHORT,
+            );
+          } else {
+            this.setState({loading: false});
+            alert('Harap perhatikan stok.');
+          }
+        })
+        .catch((err) => {
+          this.setState({loading: false});
+          alert('Terjadi kesalahan. ' + err);
+        });
     } else {
-      this.over();
+      alert('Mau beli berapa banyak?');
     }
   }
 
@@ -143,67 +134,8 @@ export class DetailProduct extends Component {
           alert('Terjadi kesalahan. ' + err);
         });
     } else {
-      this.over();
+      alert('Mau beli berapa banyak?');
     }
-  }
-
-  getShop() {
-    console.log('mengambil data toko penjual..');
-    this.setState({loading: true});
-    fetch(`http://si--amanah.herokuapp.com/api/myshop`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.state.token}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        JSON.stringify(responseJson);
-        if (responseJson.data != null) {
-          this.setState({
-            loading: false,
-            toko: responseJson.data[0],
-          });
-          console.log('toko: ' + this.state.toko);
-        } else {
-          this.setState({loading: false});
-          console.log('toko tidak ditemukan');
-        }
-        this.setState({refresh: false});
-      })
-      .catch((err) => {
-        this.setState({loading: false});
-        console.log('Terjadi kesalahan: ' + err);
-      });
-  }
-
-  over() {
-    Alert.alert(
-      'Perhatian',
-      'Mau beli berapa banyak.',
-      [
-        {
-          text: 'Kembali',
-          onPress: () => console.log('Cancel Pressed'),
-        },
-      ],
-      {cancelable: false},
-    );
-  }
-
-  overStock() {
-    Alert.alert(
-      'Perhatian',
-      'Kamu sudah memesan melebihi stok!.',
-      [
-        {
-          text: 'Ok',
-          onPress: () => console.log('Cancel Pressed'),
-        },
-      ],
-      {cancelable: false},
-    );
   }
 
   render() {
@@ -246,13 +178,9 @@ export class DetailProduct extends Component {
                 Rp.{this.toPrice(this.props.route.params.item.price)},-
               </Text>
               <View style={styles.viewQty}>
-                {this.props.route.params.item.stock <= 0 ? (
-                  <Text style={{fontSize: 17, color: 'red'}}>Stok habis!</Text>
-                ) : (
-                  <Text style={{fontSize: 17}}>
-                    Stok barang: {this.props.route.params.item.stock}
-                  </Text>
-                )}
+                <Text style={{fontSize: 17}}>
+                  Stok barang: {this.props.route.params.item.stock}
+                </Text>
                 <View style={styles.viewQtys}>
                   <TouchableOpacity
                     onPress={() => this.minus()}
@@ -272,7 +200,7 @@ export class DetailProduct extends Component {
                   style={styles.chatSeller}
                   onPress={() =>
                     this.props.navigation.navigate('ChatScreen', {
-                      data: this.props.route.params.item.user,
+                      seller: this.props.route.params.item,
                     })
                   }>
                   <Text style={styles.textChatSeller}>Chat Penjual</Text>
@@ -297,39 +225,6 @@ export class DetailProduct extends Component {
                   <Text style={styles.textPurchase}>Beli Sekarang!</Text>
                 </TouchableOpacity>
               </View>
-              {this.props.route.params.item.shop == null ? (
-                <View></View>
-              ) : (
-                <View style={styles.toko}>
-                  <Image
-                    source={{uri: this.props.route.params.item.shop.image}}
-                    style={styles.tokoImg}
-                  />
-                  <View style={{flex: 1}}>
-                    <Text style={styles.textToko}>
-                      {' '}
-                      {this.props.route.params.item.shop.name}{' '}
-                    </Text>
-                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                      <Image
-                        source={require('../assets/map-placeholder.png')}
-                        style={styles.star2}
-                      />
-                      <Text style={styles.textToko2}>
-                        {' '}
-                        {this.props.route.params.item.shop.alamat}{' '}
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.viewStar}>
-                    <Image
-                      source={require('../assets/rate-star-button.png')}
-                      style={styles.star}
-                    />
-                    <Text style={styles.textStar}>Star Seller</Text>
-                  </View>
-                </View>
-              )}
               <View style={styles.viewDesc}>
                 <Text style={styles.textDescPro}>Deskripsi Barang:</Text>
                 <Text style={styles.textDesc}>
@@ -519,53 +414,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderColor: 'black',
     borderWidth: 1,
-    borderRadius: 3,
     // justifyContent: 'space-evenly',
-  },
-  toko: {
-    borderTopWidth: 1,
-    borderTopColor: 'black',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 10,
-    marginTop: 10,
-  },
-  tokoImg: {
-    width: 50,
-    height: 50,
-    borderRadius: 50 / 2,
-    marginRight: 5,
-  },
-  textToko: {
-    fontWeight: 'bold',
-    fontSize: 17,
-  },
-  textToko2: {
-    fontWeight: 'bold',
-    fontSize: 15,
-    color: 'grey',
-  },
-  star: {
-    width: 16,
-    height: 16,
-    tintColor: 'white',
-    marginRight: 4,
-  },
-  star2: {
-    width: 16,
-    height: 16,
-    tintColor: 'grey',
-  },
-  textStar: {
-    color: 'white',
-    marginRight: 3,
-  },
-  viewStar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f5a300',
-    padding: 3,
-    borderRadius: 5,
   },
 });
 

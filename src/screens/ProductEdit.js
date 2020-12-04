@@ -14,6 +14,8 @@ import {
   TouchableOpacity,
   View,
   Picker,
+  Alert,
+  ToastAndroid,
 } from 'react-native';
 
 class ProfileEdit extends Component {
@@ -113,7 +115,7 @@ class ProfileEdit extends Component {
         .then((response) => response.json())
         .then((response) => {
           if (response) this.setState({loading: false});
-          alert('Barang telah diedit');
+          ToastAndroid.show('Produk telah disunting.', ToastAndroid.LONG);
           console.log(response);
           this.props.navigation.replace('BottomTab', {screen: 'Profile'});
         })
@@ -143,6 +145,7 @@ class ProfileEdit extends Component {
       .then((json) => {
         const {status} = json;
         if (status == 'Success') {
+          ToastAndroid.show('Produk telah dihapus.', ToastAndroid.LONG);
           this.props.navigation.replace('BottomTab', {screen: 'Profile'});
         } else {
           alert('Gagal menghapus');
@@ -179,6 +182,36 @@ class ProfileEdit extends Component {
       }
     });
   };
+
+  alert() {
+    Alert.alert(
+      'Sukses',
+      'Barang telah disunting.',
+      [
+        {
+          text: 'Ok',
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
+  alert2() {
+    Alert.alert(
+      'Anda yakin?',
+      'Barang akan dihapus dan tidak bisa diulang kembali.',
+      [
+        {
+          text: 'Batal',
+          onPress: () => console.log('Cancel Pressed'),
+        },
+        {
+          text: 'Iya',
+          onPress: () => this.deleteProduct(),
+        },
+      ],
+    );
+  }
 
   render() {
     return (
@@ -222,6 +255,35 @@ class ProfileEdit extends Component {
                 <Picker.Item key={index} label={value.name} value={value.id} />
               ))}
             </Picker>
+            <View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <View>
+                  <Text>Stok</Text>
+                  <TextInput
+                    value={`${this.state.stock}`}
+                    keyboardType={'number-pad'}
+                    placeholder="eg. 50"
+                    onChangeText={(input) => this.setState({stock: input})}
+                    style={styles.textInput2}
+                  />
+                </View>
+                <View>
+                  <Text>Berat (KG)</Text>
+                  <TextInput
+                    value={`${this.state.weight}`}
+                    keyboardType={'number-pad'}
+                    placeholder="eg. 5"
+                    onChangeText={(input) => this.setState({weight: input})}
+                    style={styles.textInput2}
+                  />
+                </View>
+              </View>
+            </View>
             <Text>Deskripsi</Text>
             <TextInput
               value={this.state.description}
@@ -230,29 +292,23 @@ class ProfileEdit extends Component {
               style={styles.textInput}
             />
             <Text>Harga</Text>
-            <TextInput
-              value={`${this.state.price}`}
-              keyboardType="number-pad"
-              placeholder="eg. Rp.50.000,-"
-              onChangeText={(input) => this.setState({price: input})}
-              style={styles.textInput}
-            />
-            <Text>Stok</Text>
-            <TextInput
-              value={`${this.state.stock}`}
-              keyboardType={'number-pad'}
-              placeholder="eg. 50"
-              onChangeText={(input) => this.setState({stock: input})}
-              style={styles.textInput}
-            />
-            <Text>Berat (KG)</Text>
-            <TextInput
-              value={`${this.state.weight}`}
-              keyboardType={'number-pad'}
-              placeholder="eg. 5"
-              onChangeText={(input) => this.setState({weight: input})}
-              style={styles.textInput}
-            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={{fontSize: 20}}>Rp.</Text>
+
+              <TextInput
+                value={`${this.state.price}`}
+                keyboardType="number-pad"
+                placeholder="eg. Rp.50.000,-"
+                onChangeText={(input) => this.setState({price: input})}
+                style={styles.textInput3}
+              />
+              <Text style={{fontSize: 20}}>,-</Text>
+            </View>
           </View>
           <View
             style={{
@@ -268,7 +324,7 @@ class ProfileEdit extends Component {
               }>
               <Text style={styles.text}> Batal </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.deleteProduct()}>
+            <TouchableOpacity onPress={() => this.alert2()}>
               <Image
                 source={require('../assets/rubbish-bin-delete-button.png')}
                 style={{width: 40, height: 40}}
@@ -358,7 +414,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   touchEdit2: {
-    width: 160,
+    width: 143.5,
     height: 50,
     paddingHorizontal: 10,
     justifyContent: 'center',
@@ -384,9 +440,29 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     marginTop: 5,
   },
+  textInput2: {
+    flex: 1,
+    borderColor: 'black',
+    borderWidth: 2,
+    paddingHorizontal: 10,
+    height: 40,
+    marginBottom: 15,
+    marginTop: 5,
+    width: 150,
+  },
   textPlus: {
     alignSelf: 'center',
     fontSize: 50,
+  },
+  textInput3: {
+    flex: 1,
+    borderColor: 'black',
+    borderWidth: 2,
+    paddingHorizontal: 10,
+    marginHorizontal: 10,
+    height: 40,
+    marginBottom: 15,
+    marginTop: 5,
   },
 });
 

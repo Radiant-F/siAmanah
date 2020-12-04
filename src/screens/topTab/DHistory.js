@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-community/async-storage';
 import LottieView from 'lottie-react-native';
 import React, {Component} from 'react';
+import _ from 'lodash';
 import {Button, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 class History extends Component {
@@ -12,6 +13,10 @@ class History extends Component {
       loading: false,
       status: '',
     };
+  }
+
+  toPrice(price) {
+    return _.replace(price, /\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
   componentDidMount() {
@@ -27,7 +32,6 @@ class History extends Component {
   }
 
   confirmedPayment() {
-    console.log('Mengambil histori..');
     this.setState({loading: true});
     fetch(`https://si--amanah.herokuapp.com/api/history`, {
       method: 'GET',
@@ -44,8 +48,7 @@ class History extends Component {
             loading: false,
             dataHistory: responseJson.data,
           });
-          console.log('History:');
-          console.log(this.state.dataHistory);
+          console.log('Status: ', this.state.dataHistory);
         } else {
           this.setState({loading: false});
           console.log('History:');
@@ -61,48 +64,50 @@ class History extends Component {
   render() {
     return (
       <View style={{flex: 1, padding: 10}}>
-        {this.state.dataHistory == '' ? (
-          <View style={styles.viewLoading}>
-            <LottieView
-              autoPlay
-              style={{width: 120}}
-              source={require('../../assets/8205-loading-animation.json')}
-            />
-          </View>
-        ) : (
-          <View>
-            <Text>Histori pesanan Anda:</Text>
-            {this.state.dataHistory.map((value, index) => (
-              <View key={index} style={{marginVertical: 10}}>
-                <View style={styles.viewHistory}>
-                  <Text>
-                    Jumlah Harga:
-                    <Text style={{fontWeight: 'bold'}}>
-                      {' '}
-                      Rp.{value.jumlah_harga},-
+        <ScrollView>
+          {this.state.dataHistory == '' ? (
+            <View style={styles.viewLoading}>
+              <LottieView
+                autoPlay
+                style={{width: 160}}
+                source={require('../../assets/17990-empty-cart.json')}
+              />
+            </View>
+          ) : (
+            <View>
+              <Text>Histori pesanan Anda:</Text>
+              {this.state.dataHistory.map((value, index) => (
+                <View key={index} style={{marginVertical: 10}}>
+                  <View style={styles.viewHistory}>
+                    <Text>
+                      Jumlah Harga:
+                      <Text style={{fontWeight: 'bold'}}>
+                        {' '}
+                        Rp.{this.toPrice(value.jumlah_harga)},-
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text>
-                    Tujuan:
-                    <Text style={{fontWeight: 'bold'}}> {value.tujuan}</Text>
-                  </Text>
-                  <Text>
-                    Tanggal pemesanan:
-                    <Text style={{fontWeight: 'bold'}}> {value.tanggal}</Text>
-                  </Text>
+                    <Text>
+                      Tujuan:
+                      <Text style={{fontWeight: 'bold'}}> {value.tujuan}</Text>
+                    </Text>
+                    <Text>
+                      Tanggal pemesanan:
+                      <Text style={{fontWeight: 'bold'}}> {value.tanggal}</Text>
+                    </Text>
+                  </View>
+                  <Button
+                    title="Lihat detail pemesanan"
+                    onPress={() =>
+                      this.props.navigation.navigate('OrderDetail', {
+                        id: value.id,
+                      })
+                    }
+                  />
                 </View>
-                <Button
-                  title="Lihat detail pemesanan"
-                  onPress={() =>
-                    this.props.navigation.navigate('OrderDetail', {
-                      id: value.id,
-                    })
-                  }
-                />
-              </View>
-            ))}
-          </View>
-        )}
+              ))}
+            </View>
+          )}
+        </ScrollView>
       </View>
     );
   }

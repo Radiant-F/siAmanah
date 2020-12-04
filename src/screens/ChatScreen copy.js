@@ -18,36 +18,42 @@ class ChatScreen extends Component {
   constructor() {
     super();
     this.state = {
-      user: '',
       sellerName: '',
       receiver_id: '',
-      text: '',
+      message: '',
       token: '',
       history: [],
       loading: false,
     };
+    var pusher = new Pusher('XXX_APP_KEY', {
+      cluster: 'XXX_APP_CLUSTER',
+    });
+    var my_channel = pusher.subscribe('pubchat');
+    //bind and listen for chat events
+    my_channel.bind('message_sent', (data) => {
+      this.state.messages_array.push(data);
+      this.setState({
+        text: '',
+      });
+    });
   }
 
   componentDidMount() {
     this.getToken();
-    Pusher.logToConsole = true;
-    var pusher = new Pusher('714107c06ab063eee783', {
-      cluster: 'ap1',
-    });
-    var channel = pusher.subscribe('my-channel');
-    channel.bind('my-event', (data) => {
-      // alert(JSON.stringify(data));
-      this.getMessage();
-    });
   }
 
   getToken() {
     AsyncStorage.getItem('token')
       .then((value) => {
         if (value != null) {
-          this.setState({token: value});
+          this.setState({
+            token: value,
+            receiver_id: this.props.route.params.data.id,
+          });
+          console.log('token tersedia');
           this.getUser();
-          this.getMessage();
+        } else {
+          console.log('token hilang');
         }
       })
       .catch((err) => console.log('Terjadi kesalahan. ' + err));
@@ -70,6 +76,7 @@ class ChatScreen extends Component {
         console.log('ID user saat ini: ' + this.state.user.id);
         console.log('nama penjual: ' + this.props.route.params.data.id);
         console.log('ID penjual: ' + this.state.receiver_id);
+        this.getMessage();
       })
       .catch((err) => {
         console.log('Terjadi kesalahan. ' + err);
@@ -79,7 +86,7 @@ class ChatScreen extends Component {
   getMessage() {
     console.log('sedang mengambil chat..');
     fetch(
-      `http://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
+      `http://si--amanah.herokuapp.com/api/message/${this.state.receiver_id}`,
       {
         method: 'GET',
         headers: {
@@ -89,11 +96,12 @@ class ChatScreen extends Component {
       },
     )
       .then((response) => response.json())
-      .then((response) => {
-        let riwayat = response.data;
+      .then((responseJson) => {
+        let riwayat = responseJson[0];
         riwayat.sort((a, b) => a.id - b.id);
-        this.setState({history: riwayat, loading: false});
-        console.log(riwayat);
+        this.setState({history: riwayat});
+        console.log('semua chat terambil.');
+        this.pusher();
       })
       .catch((err) => {
         console.log('Terjadi kesalahan. ' + err);
@@ -101,27 +109,25 @@ class ChatScreen extends Component {
   }
 
   sendMessage() {
-    if (this.state.text != '') {
-      this.setState({loading: true, text: ''});
+    if (this.state.message != '') {
+      const {message, receiver_id} = this.state;
+      const kirimData = {message: message, receiver_id: receiver_id};
+      this.setState({loading: true, message: ''});
       console.log('sedang mengirim pesan..');
-      fetch(
-        `http://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.state.token}`,
-          },
-          body: JSON.stringify({message: this.state.text}),
+      fetch(`http://si--amanah.herokuapp.com/api/message`, {
+        method: 'POST',
+        body: JSON.stringify(kirimData),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.state.token}`,
         },
-      )
-        .then((response) => response.json())
+      })
+        .then((response) => response.text())
         .then((responseJSON) => {
-          console.log(responseJSON.data);
           const {status} = responseJSON;
           if (status != 'error') {
             this.setState({loading: false});
-            console.log('pesan terkirim');
+            console.log('pesan terkirim.');
             this.getMessage();
           } else {
             this.setState({loading: false});
@@ -137,24 +143,7 @@ class ChatScreen extends Component {
     }
   }
 
-  loop() {
-    var element = [];
-    for (var index = 0; index < this.state.history.length; index++) {
-      element.push(
-        <View key={'container' + index}>
-          {/* <Text key={'author' + index}>{this.state.history[index].name}</Text> */}
-          <Text key={index} style={styles.viewMessageRight}>
-            {this.state.history[index].message}
-          </Text>
-        </View>,
-      );
-    }
-    return element;
-  }
-
   render() {
-    const {data} = this.props.route.params;
-    var myloop = this.loop();
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>
@@ -172,7 +161,7 @@ class ChatScreen extends Component {
             </Text>
           </ImageBackground>
         </View>
-        <ScrollView snapToEnd={true}>
+        <ScrollView>
           {this.state.history == '' ? (
             <View style={styles.viewLoading}>
               <LottieView
@@ -185,15 +174,13 @@ class ChatScreen extends Component {
             <View>
               {this.state.history.map((value, index) => (
                 <View key={index} style={styles.viewText}>
-                  {value.to == this.state.user.id ? (
-                    <View style={styles.viewMessageLeft}>
-                      <Text style={styles.textMessage}>{value.message}</Text>
-                      <Text style={styles.textTime2}>{value.created_at}</Text>
+                  {value.from == this.state.user.id ? (
+                    <View style={styles.viewMessageRight}>
+                      <Text>{value.message}</Text>
                     </View>
                   ) : (
-                    <View style={styles.viewMessageRight}>
-                      <Text style={styles.textMessage}>{value.message}</Text>
-                      <Text style={styles.textTime}>{value.created_at}</Text>
+                    <View style={styles.viewMessageLeft}>
+                      <Text>{value.message}</Text>
                     </View>
                   )}
                 </View>
@@ -203,10 +190,10 @@ class ChatScreen extends Component {
         </ScrollView>
         <View style={styles.viewSend}>
           <TextInput
-            value={this.state.text}
+            value={this.state.message}
             placeholder="Tulis Pesan..."
             style={styles.input}
-            onChangeText={(input) => this.setState({text: input})}
+            onChangeText={(input) => this.setState({message: input})}
           />
           <TouchableOpacity onPress={() => this.sendMessage()}>
             <Image
@@ -224,6 +211,10 @@ class ChatScreen extends Component {
 const styles = StyleSheet.create({
   header: {
     backgroundColor: '#4EC5F1',
+    // height: 60,
+    // alignItems: 'center',
+    // paddingHorizontal: 20,
+    // flexDirection: 'row',
   },
   headerBg: {
     paddingHorizontal: 15,
@@ -270,46 +261,27 @@ const styles = StyleSheet.create({
   viewMessageRight: {
     backgroundColor: '#ff9d5c',
     alignSelf: 'flex-end',
-    paddingHorizontal: 5,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 10,
     elevation: 2,
-    maxWidth: '80%',
   },
   viewMessageLeft: {
     backgroundColor: '#fff',
     alignSelf: 'flex-start',
-    paddingHorizontal: 5,
-    borderRadius: 5,
+    padding: 10,
+    borderRadius: 10,
     elevation: 2,
-    maxWidth: '80%',
   },
   viewLoading: {
     backgroundColor: 'white',
     alignItems: 'center',
-    // paddingHorizontal: 10,
+    paddingHorizontal: 10,
     borderRadius: 10,
     alignSelf: 'center',
     elevation: 1,
     marginBottom: 10,
     margin: 10,
     width: '95%',
-  },
-  textTime: {
-    alignSelf: 'flex-end',
-    color: 'grey',
-    fontWeight: 'bold',
-    fontSize: 10,
-    margin: 5,
-  },
-  textTime2: {
-    color: 'grey',
-    fontWeight: 'bold',
-    fontSize: 10,
-    margin: 5,
-  },
-  textMessage: {
-    marginHorizontal: 5,
-    marginTop: 5,
   },
 });
 

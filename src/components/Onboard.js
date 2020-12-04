@@ -2,8 +2,15 @@ import React, {Component} from 'react';
 import {StyleSheet} from 'react-native';
 import Onboarding from 'react-native-onboarding-swiper';
 import LottieView from 'lottie-react-native';
+import AsyncStorage from '@react-native-community/async-storage';
 
 class Onboard extends Component {
+  constructor() {
+    super();
+    this.state = {
+      isFirst: 'true',
+    };
+  }
   render() {
     return (
       <Onboarding
@@ -20,6 +27,7 @@ class Onboard extends Component {
                 source={require('../assets/36605-shopping-cart.json')}
                 style={styles.image}
                 autoPlay={true}
+                style={{width: 260}}
               />
             ),
             title: 'siAmanah',
@@ -33,6 +41,7 @@ class Onboard extends Component {
                 style={styles.image}
                 loop={false}
                 autoPlay={true}
+                style={{width: 260}}
               />
             ),
             title: 'Privasi',

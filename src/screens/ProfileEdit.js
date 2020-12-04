@@ -12,11 +12,12 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  ToastAndroid,
 } from 'react-native';
 
 class ProfileEdit extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       token: '',
       name: '',
@@ -71,7 +72,7 @@ class ProfileEdit extends Component {
           console.log(response);
           if (response.status == 'Success') {
             console.log('upload succes', response);
-            alert('Data dirubah!');
+            ToastAndroid.show('Profil telah disunting', ToastAndroid.SHORT);
             this.props.navigation.replace('BottomTab', {screen: 'Profile'});
           } else {
             alert('Error');
@@ -116,7 +117,8 @@ class ProfileEdit extends Component {
   };
 
   logout() {
-    AsyncStorage.clear();
+    console.log('dadah.');
+    AsyncStorage.removeItem('token');
     this.props.navigation.replace('Login');
   }
 
@@ -191,7 +193,9 @@ class ProfileEdit extends Component {
             }}>
             <TouchableOpacity
               style={styles.touchAbort}
-              onPress={() => this.props.navigation.goBack()}>
+              onPress={() =>
+                this.props.navigation.replace('BottomTab', {screen: 'Profile'})
+              }>
               <Text style={styles.text}> Batal </Text>
             </TouchableOpacity>
             {this.state.loading ? (
