@@ -96,13 +96,6 @@ class HomePage extends Component {
                 style={styles.headerIcon}
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => this.props.navigation.navigate('Favorite')}>
-              <Image
-                source={require('../assets/favorite-heart-button.png')}
-                style={styles.headerIcon}
-              />
-            </TouchableOpacity>
           </ImageBackground>
         </View>
         <ScrollView

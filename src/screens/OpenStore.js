@@ -50,7 +50,7 @@ class OpenStore extends Component {
         alamat: alamat,
       };
       this.setState({loading: true});
-      fetch('http://si--amanah.herokuapp.com/api/shop', {
+      fetch('https://si--amanah.herokuapp.com/api/shop', {
         method: 'POST',
         body: this.createFormData(photo, product),
         headers: {

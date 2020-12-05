@@ -42,7 +42,7 @@ class Register extends Component {
       };
       console.log('mendaftar...');
       this.setState({loading: true});
-      fetch('http://si--amanah.herokuapp.com/api/register', {
+      fetch('https://si--amanah.herokuapp.com/api/register', {
         method: 'POST',
         body: JSON.stringify(dataToSend),
         headers: {

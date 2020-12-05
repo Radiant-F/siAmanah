@@ -38,7 +38,7 @@ class ScreenBooks extends Component {
 
   getProduct() {
     console.log('sedang mengambil produk..');
-    fetch('http://si--amanah.herokuapp.com/api/kategori/3', {
+    fetch('https://si--amanah.herokuapp.com/api/kategori/3', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

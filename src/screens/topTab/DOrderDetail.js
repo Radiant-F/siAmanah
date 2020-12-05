@@ -81,7 +81,7 @@ class DetailOrder extends Component {
   confirmProduct(id) {
     console.log('Mengkonfirmasi...');
     this.setState({loading: true});
-    fetch(`http://si--amanah.herokuapp.com/api/accept/${id}`, {
+    fetch(`https://si--amanah.herokuapp.com/api/accept/${id}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

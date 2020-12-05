@@ -37,7 +37,7 @@ class ScreenClothes extends Component {
 
   getProduct() {
     console.log('sedang mengambil produk..');
-    fetch('http://si--amanah.herokuapp.com/api/kategori/2', {
+    fetch('https://si--amanah.herokuapp.com/api/kategori/2', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

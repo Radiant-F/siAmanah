@@ -56,7 +56,7 @@ class ProfileEdit extends Component {
   }
 
   getCategory() {
-    fetch('http://si--amanah.herokuapp.com/api/category', {
+    fetch('https://si--amanah.herokuapp.com/api/category', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ class ProfileEdit extends Component {
       };
       this.setState({loading: true});
       fetch(
-        `http://si--amanah.herokuapp.com/api/product/${this.props.route.params.data.id}`,
+        `https://si--amanah.herokuapp.com/api/product/${this.props.route.params.data.id}`,
         {
           method: 'POST',
           body: this.createFormData(photo, product),
@@ -132,7 +132,7 @@ class ProfileEdit extends Component {
 
   deleteProduct() {
     fetch(
-      `http://si--amanah.herokuapp.com/api/product/${this.props.route.params.data.id}`,
+      `https://si--amanah.herokuapp.com/api/product/${this.props.route.params.data.id}`,
       {
         method: 'DELETE',
         headers: {

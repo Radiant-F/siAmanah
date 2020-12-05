@@ -47,7 +47,7 @@ class ProfileEdit extends Component {
 
   getCategory() {
     console.log('mengambil kategori..');
-    fetch('http://si--amanah.herokuapp.com/api/category', {
+    fetch('https://si--amanah.herokuapp.com/api/category', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ class ProfileEdit extends Component {
         stock: stock,
       };
       this.setState({loading: true});
-      fetch('http://si--amanah.herokuapp.com/api/product', {
+      fetch('https://si--amanah.herokuapp.com/api/product', {
         method: 'POST',
         body: this.createFormData(photo, product),
         headers: {

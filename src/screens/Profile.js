@@ -39,7 +39,7 @@ class Profile extends Component {
 
   getUser() {
     console.log('sedang mengambil user..');
-    fetch('http://si--amanah.herokuapp.com/api/profile', {
+    fetch('https://si--amanah.herokuapp.com/api/profile', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

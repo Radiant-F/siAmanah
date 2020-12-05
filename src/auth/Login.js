@@ -40,7 +40,7 @@ class Login extends Component {
       const {email, password} = this.state;
       const kirimData = {email: email, password: password};
       this.setState({loading: true});
-      fetch('http://si--amanah.herokuapp.com/api/login', {
+      fetch('https://si--amanah.herokuapp.com/api/login', {
         method: 'POST',
         body: JSON.stringify(kirimData),
         headers: {

@@ -82,7 +82,7 @@ export default class CStatus extends Component {
         transfer_to: transfer_to,
       };
       this.setState({loading: true});
-      fetch(`http://si--amanah.herokuapp.com/api/payment`, {
+      fetch(`https://si--amanah.herokuapp.com/api/payment`, {
         method: 'POST',
         body: this.createFormData(photo, body),
         headers: {

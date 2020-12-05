@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
   ToastAndroid,
+  Alert,
 } from 'react-native';
 
 class ProfileEdit extends Component {
@@ -50,41 +51,45 @@ class ProfileEdit extends Component {
   }
 
   editProfile() {
-    const {name, alamat, nomor_telpon, email, password, photo} = this.state;
-    if (photo.name === undefined) {
-      const profile = {
-        name: name,
-        alamat: alamat,
-        email: email,
-        nomor_telpon: nomor_telpon,
-        password_confirmation: password,
-      };
-      this.setState({loading: true});
-      fetch(`http://si--amanah.herokuapp.com/api/profile`, {
-        method: 'POST',
-        body: this.createFormData(photo, profile),
-        headers: {
-          Authorization: `Bearer ${this.state.token}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((response) => {
-          console.log(response);
-          if (response.status == 'Success') {
-            console.log('upload succes', response);
-            ToastAndroid.show('Profil telah disunting', ToastAndroid.SHORT);
-            this.props.navigation.replace('BottomTab', {screen: 'Profile'});
-          } else {
-            alert('Error');
-            this.setState({loading: false});
-          }
+    if (this.state.password != '') {
+      const {name, alamat, nomor_telpon, email, password, photo} = this.state;
+      if (photo.name === undefined) {
+        const profile = {
+          name: name,
+          alamat: alamat,
+          email: email,
+          nomor_telpon: nomor_telpon,
+          password_confirmation: password,
+        };
+        this.setState({loading: true});
+        fetch(`https://si--amanah.herokuapp.com/api/profile`, {
+          method: 'POST',
+          body: this.createFormData(photo, profile),
+          headers: {
+            Authorization: `Bearer ${this.state.token}`,
+          },
         })
-        .catch((error) => {
-          this.setState({loading: false});
-          alert('Terjadi kesalahan. ' + error);
-        });
+          .then((response) => response.json())
+          .then((response) => {
+            console.log(response);
+            if (response.status == 'Success') {
+              console.log('upload succes', response);
+              ToastAndroid.show('Profil telah disunting', ToastAndroid.SHORT);
+              this.props.navigation.replace('BottomTab', {screen: 'Profile'});
+            } else {
+              alert('Error');
+              this.setState({loading: false});
+            }
+          })
+          .catch((error) => {
+            this.setState({loading: false});
+            alert('Terjadi kesalahan. ' + error);
+          });
+      } else {
+        alert('Gambar harus dirubah');
+      }
     } else {
-      alert('Gambar harus dirubah');
+      this.alert();
     }
   }
 
@@ -120,6 +125,19 @@ class ProfileEdit extends Component {
     console.log('dadah.');
     AsyncStorage.removeItem('token');
     this.props.navigation.replace('Login');
+  }
+
+  alert() {
+    Alert.alert(
+      'Perhatian',
+      'Harap konfimasi password Anda.',
+      [
+        {
+          text: 'Ok',
+        },
+      ],
+      {cancelable: false},
+    );
   }
 
   render() {

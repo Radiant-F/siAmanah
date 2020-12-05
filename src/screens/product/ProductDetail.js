@@ -69,7 +69,7 @@ export class DetailProduct extends Component {
         const kirimData = {jumlah_pesan: qty};
         this.setState({loading: true});
         fetch(
-          `http://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
+          `https://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
           {
             method: 'POST',
             body: JSON.stringify(kirimData),
@@ -120,7 +120,7 @@ export class DetailProduct extends Component {
         const kirimData = {jumlah_pesan: qty};
         this.setState({loading: true});
         fetch(
-          `http://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
+          `https://si--amanah.herokuapp.com/api/order/${this.state.idProduk}`,
           {
             method: 'POST',
             body: JSON.stringify(kirimData),
@@ -159,7 +159,7 @@ export class DetailProduct extends Component {
   getShop() {
     console.log('mengambil data toko penjual..');
     this.setState({loading: true});
-    fetch(`http://si--amanah.herokuapp.com/api/myshop`, {
+    fetch(`https://si--amanah.herokuapp.com/api/myshop`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

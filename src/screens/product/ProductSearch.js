@@ -35,7 +35,7 @@ export default class ProductSearch extends Component {
       const kirim = {search: search};
       console.log('mencari produk...');
       this.setState({loading: false, data: ''});
-      fetch(`http://si--amanah.herokuapp.com/api/product/search`, {
+      fetch(`https://si--amanah.herokuapp.com/api/product/search`, {
         method: 'POST',
         body: JSON.stringify(kirim),
         headers: {

@@ -33,7 +33,7 @@ class Chat extends Component {
 
   getUser() {
     console.log('mengambil ID user..');
-    fetch('http://si--amanah.herokuapp.com/api/profile', {
+    fetch('https://si--amanah.herokuapp.com/api/profile', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ class Chat extends Component {
 
   getAllUser() {
     console.log('mengambil chat..');
-    fetch(`http://si--amanah.herokuapp.com/api/allmessage`, {
+    fetch(`https://si--amanah.herokuapp.com/api/allmessage`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -72,13 +72,16 @@ class Chat extends Component {
 
   getMessage() {
     console.log('sedang mengambil chat..');
-    fetch(`http://si--amanah.herokuapp.com/api/message/${this.state.user.id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.state.token}`,
+    fetch(
+      `https://si--amanah.herokuapp.com/api/message/${this.state.user.id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.state.token}`,
+        },
       },
-    })
+    )
       .then((response) => response.json())
       .then((responseJson) => {
         this.setState({data: responseJson[0]});

@@ -111,7 +111,7 @@ class Cart extends Component {
         tujuan: tujuan,
       };
       this.setState({loading: true});
-      fetch('http://si--amanah.herokuapp.com/api/konfirmasi-check-out', {
+      fetch('https://si--amanah.herokuapp.com/api/konfirmasi-check-out', {
         method: 'POST',
         body: JSON.stringify(body),
         headers: {
@@ -167,16 +167,7 @@ class Cart extends Component {
           </View>
         ) : (
           <View>
-            <ScrollView
-              refreshControl={
-                <RefreshControl
-                  refreshing={this.state.refresh}
-                  onRefresh={() => {
-                    this.componentDidMount();
-                    this.setState({refresh: true});
-                  }}
-                />
-              }>
+            <ScrollView>
               <View style={style.viewAdress}>
                 <Text>Masukan alamat tujuan: </Text>
                 <TextInput

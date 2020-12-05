@@ -44,7 +44,7 @@ export default class PesananPenjual extends Component {
 
   getOrder() {
     console.log('sedang mengambil pesanan..');
-    fetch('http://si--amanah.herokuapp.com/api/gasorder', {
+    fetch('https://si--amanah.herokuapp.com/api/gasorder', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ export default class PesananPenjual extends Component {
 
   confirmOrder(id) {
     this.setState({loading: true, dataSource: ''});
-    fetch(`http://si--amanah.herokuapp.com/api/send/${id}`, {
+    fetch(`https://si--amanah.herokuapp.com/api/send/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

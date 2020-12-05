@@ -55,7 +55,7 @@ class ChatScreen extends Component {
 
   getUser() {
     console.log('mengambil data..');
-    fetch('http://si--amanah.herokuapp.com/api/profile', {
+    fetch('https://si--amanah.herokuapp.com/api/profile', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ class ChatScreen extends Component {
   getMessage() {
     console.log('sedang mengambil chat..');
     fetch(
-      `http://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
+      `https://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
       {
         method: 'GET',
         headers: {
@@ -105,7 +105,7 @@ class ChatScreen extends Component {
       this.setState({loading: true, text: ''});
       console.log('sedang mengirim pesan..');
       fetch(
-        `http://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
+        `https://si--amanah.herokuapp.com/api/message/${this.props.route.params.data.id}`,
         {
           method: 'POST',
           headers: {
