@@ -258,7 +258,7 @@ class ProfileEdit extends Component {
             <TouchableOpacity
               style={styles.touchAbort}
               onPress={() =>
-                this.props.navigation.replace('BottomTab', {screen: 'Profil'})
+                this.props.navigation.replace('BottomTab', {screen: 'Profile'})
               }>
               <Text style={styles.text}> Batal </Text>
             </TouchableOpacity>

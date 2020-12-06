@@ -125,7 +125,9 @@ class Cart extends Component {
           if (response.status == 'Success') this.setState({loading: false});
           console.log(response);
           this.alert();
-          this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
+          this.setState({cart: ''});
+          this.getItem();
+          // this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
         })
         .catch((error) => {
           this.setState({loading: false});

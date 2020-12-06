@@ -86,13 +86,26 @@ export default class PesananPenjual extends Component {
           this.setState({loading: false});
         } else {
           this.setState({loading: false});
-          alert('Gagal dikonfirmasi.');
+          this.alert2()('Gagal dikonfirmasi.');
         }
       })
       .catch((err) => {
         this.setState({loading: false});
         alert('Terjadi kesalahan. ' + err);
       });
+  }
+
+  alert2() {
+    Alert.alert(
+      'Gagal',
+      'Gagal mengkonfirmasi.',
+      [
+        {
+          text: 'Ok',
+        },
+      ],
+      {cancelable: false},
+    );
   }
 
   alert() {

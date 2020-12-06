@@ -2,7 +2,14 @@ import AsyncStorage from '@react-native-community/async-storage';
 import LottieView from 'lottie-react-native';
 import React, {Component} from 'react';
 import _ from 'lodash';
-import {Button, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  RefreshControl,
+} from 'react-native';
 
 class History extends Component {
   constructor() {
@@ -12,6 +19,7 @@ class History extends Component {
       dataHistory: [],
       loading: false,
       status: '',
+      refresh: false,
     };
   }
 
@@ -47,16 +55,17 @@ class History extends Component {
           this.setState({
             loading: false,
             dataHistory: responseJson.data,
+            refresh: false,
           });
           console.log('Status: ', this.state.dataHistory);
         } else {
-          this.setState({loading: false});
+          this.setState({loading: false, refresh: false});
           console.log('History:');
           console.log(this.state.dataHistory);
         }
       })
       .catch((err) => {
-        this.setState({loading: false});
+        this.setState({loading: false, refresh: false});
         console.log(err);
       });
   }
@@ -64,7 +73,16 @@ class History extends Component {
   render() {
     return (
       <View style={{flex: 1, padding: 10}}>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refresh}
+              onRefresh={() => {
+                this.setState({refresh: true});
+                this.confirmedPayment();
+              }}
+            />
+          }>
           {this.state.dataHistory == '' ? (
             <View style={styles.viewLoading}>
               <LottieView

@@ -198,7 +198,9 @@ class OpenStore extends Component {
               style={styles.touchOption1}
               onPress={() => this.addToko()}>
               {this.state.loading ? (
-                <ActivityIndicator color="blue" size="small" />
+                <TouchableOpacity style={styles.touchLoading}>
+                  <ActivityIndicator color="blue" size="small" />
+                </TouchableOpacity>
               ) : (
                 <Text style={styles.text}>Lanjut</Text>
               )}
@@ -283,6 +285,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: 150,
     elevation: 2,
+  },
+  touchLoading: {
+    height: 50,
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    width: 150,
   },
   viewOption: {
     flexDirection: 'row',

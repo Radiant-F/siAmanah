@@ -153,24 +153,32 @@ class Profile extends Component {
                       {this.state.user.email}
                     </Text>
                   </View>
-                  <View style={styles.viewData}>
-                    <Image
-                      source={require('../assets/map-placeholder.png')}
-                      style={styles.iconProfile}
-                    />
-                    <Text style={styles.textProfile}>
-                      {this.state.user.alamat}
-                    </Text>
-                  </View>
-                  <View style={styles.viewData2}>
-                    <Image
-                      source={require('../assets/phone-working-indicator.png')}
-                      style={styles.iconProfile}
-                    />
-                    <Text style={styles.textProfile}>
-                      {this.state.user.nomor_telpon}
-                    </Text>
-                  </View>
+                  {this.state.user.alamat == null ? (
+                    <View></View>
+                  ) : (
+                    <View style={styles.viewData}>
+                      <Image
+                        source={require('../assets/map-placeholder.png')}
+                        style={styles.iconProfile}
+                      />
+                      <Text style={styles.textProfile}>
+                        {this.state.user.alamat}
+                      </Text>
+                    </View>
+                  )}
+                  {this.state.user.nomor_telpon == null ? (
+                    <View style={{marginTop: -10}}></View>
+                  ) : (
+                    <View style={styles.viewData2}>
+                      <Image
+                        source={require('../assets/phone-working-indicator.png')}
+                        style={styles.iconProfile}
+                      />
+                      <Text style={styles.textProfile}>
+                        {this.state.user.nomor_telpon}
+                      </Text>
+                    </View>
+                  )}
                 </View>
                 <View style={styles.viewMyProduct}>
                   <Text style={styles.textProduct}> Produk Anda: </Text>

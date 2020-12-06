@@ -214,7 +214,7 @@ class HomePage extends Component {
                         source={require('../assets/map-placeholder.png')}
                         style={styles.map}
                       />
-                      <Text style={styles.textLoc}>{value.user.alamat}</Text>
+                      <Text style={styles.textLoc}>{value.shop.alamat}</Text>
                     </View>
                     <TouchableOpacity>
                       <Image

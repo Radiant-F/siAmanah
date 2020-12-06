@@ -9,9 +9,6 @@ import {
   Text,
   View,
   ImageBackground,
-  ShadowPropTypesIOS,
-  TouchableOpacity,
-  Button,
 } from 'react-native';
 
 class Nota extends Component {

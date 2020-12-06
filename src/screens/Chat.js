@@ -134,33 +134,6 @@ class Chat extends Component {
               ))}
             </View>
           )}
-          {/* {this.state.data == '' ? (
-            <View style={styles.viewLoading}>
-              <LottieView
-                autoPlay
-                style={{width: 120}}
-                source={require('../assets/16289-no-comments.json')}
-              />
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.viewChat}
-              onPress={() =>
-                this.props.navigation.navigate('ChatScreen2', {
-                  data: this.state.data,
-                })
-              }>
-              <Image
-                source={{uri: this.state.data.image}}
-                style={styles.imgPp}
-              />
-              <View style={styles.viewTextChat}>
-                <Text style={styles.textName}>{this.state.data}</Text>
-                <Text>Pesan terakhir</Text>
-              </View>
-              <Text>Waktu</Text>
-            </TouchableOpacity>
-          )} */}
         </ScrollView>
       </View>
     );

@@ -137,24 +137,7 @@ class ChatScreen extends Component {
     }
   }
 
-  loop() {
-    var element = [];
-    for (var index = 0; index < this.state.history.length; index++) {
-      element.push(
-        <View key={'container' + index}>
-          {/* <Text key={'author' + index}>{this.state.history[index].name}</Text> */}
-          <Text key={index} style={styles.viewMessageRight}>
-            {this.state.history[index].message}
-          </Text>
-        </View>,
-      );
-    }
-    return element;
-  }
-
   render() {
-    const {data} = this.props.route.params;
-    var myloop = this.loop();
     return (
       <View style={{flex: 1}}>
         <View style={styles.header}>

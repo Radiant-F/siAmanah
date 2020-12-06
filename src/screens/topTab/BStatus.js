@@ -13,6 +13,7 @@ import {
   ScrollView,
   Alert,
   ToastAndroid,
+  RefreshControl,
 } from 'react-native';
 
 export default class CStatus extends Component {
@@ -59,16 +60,17 @@ export default class CStatus extends Component {
         if (responseJson.data != '') {
           this.setState({
             loading: false,
+            refresh: false,
             data: responseJson.data,
           });
           console.log('Pembayaran: ' + this.state.data);
         } else {
-          this.setState({loading: false});
+          this.setState({loading: false, refresh: false});
           console.log('Error');
         }
       })
       .catch((err) => {
-        this.setState({loading: false});
+        this.setState({loading: false, refresh: false});
         console.log('Terjadi kesalahan: ' + err);
       });
   }
@@ -94,9 +96,10 @@ export default class CStatus extends Component {
           console.log(response);
           if (response.status == 'Success') {
             console.log('upload succes', response);
-            this.setState({loading: false});
             this.alert();
-            this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
+            this.setState({loading: false, data: ''});
+            this.getPayment();
+            // this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
           } else if (response.msg == 'nominal kurang') {
             this.setState({loading: false});
             this.alert1();
@@ -187,7 +190,16 @@ export default class CStatus extends Component {
   render() {
     return (
       <View style={{flex: 1, padding: 10}}>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refresh}
+              onRefresh={() => {
+                this.setState({refresh: true});
+                this.getPayment();
+              }}
+            />
+          }>
           {this.state.data == null ? (
             <View style={styles.viewLoading}>
               <LottieView
@@ -237,14 +249,21 @@ export default class CStatus extends Component {
                 <Text>,-</Text>
               </View>
               <Text>Konfirmasi nama Anda:</Text>
+
               <View style={styles.viewData}>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="Nama"
-                  onChangeText={(input) =>
-                    this.setState({name: input, transfer_to: input})
-                  }
-                />
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Image
+                    source={require('../../assets/user-account-box.png')}
+                    style={{width: 20, height: 20, marginRight: 10}}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="Nama"
+                    onChangeText={(input) =>
+                      this.setState({name: input, transfer_to: input})
+                    }
+                  />
+                </View>
               </View>
               <Button
                 title="Kirim bukti pembayaran"
