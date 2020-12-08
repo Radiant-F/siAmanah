@@ -82,7 +82,6 @@ class Cart extends Component {
   }
 
   deleteProduct(id) {
-    this.setState({loading: true});
     fetch(`https://si--amanah.herokuapp.com/api/check-out/${id}`, {
       method: 'DELETE',
       headers: {
@@ -96,14 +95,13 @@ class Cart extends Component {
         const {status} = json;
         if (status == 'Success') {
           ToastAndroid.show('Barang telah dihapus', ToastAndroid.SHORT);
-          this.setState({loading: false});
+          this.setState({cart: ''});
           this.getItem();
         } else {
-          this.setState({loading: false});
           alert('Gagal menghapus');
         }
       })
-      .catch((err) => console.log(err), this.setState({loading: false}));
+      .catch((err) => console.log(err));
   }
 
   checkOut() {
