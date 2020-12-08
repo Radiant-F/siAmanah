@@ -1,8 +1,7 @@
-import AsyncStorage from '@react-native-community/async-storage';
 import React, {Component} from 'react';
 import ImagePicker from 'react-native-image-picker';
 import LottieView from 'lottie-react-native';
-import TopTabToko from '../router/TopTabToko';
+import AsyncStorage from '@react-native-community/async-storage';
 import {
   Button,
   Image,
@@ -17,7 +16,7 @@ import {
   Alert,
 } from 'react-native';
 
-class ProfileEdit extends Component {
+export default class editProfile extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -30,6 +29,7 @@ class ProfileEdit extends Component {
       image: '',
       password: '',
       loading: false,
+      user: '',
     };
   }
 
@@ -38,17 +38,37 @@ class ProfileEdit extends Component {
       if (token !== null) {
         console.log('token tersedia.');
         this.setState({token: token});
-        console.log(this.props.route.params);
+        this.getUser();
       } else {
-        console.log('Tidak ada token. User harus login atau daftar.');
+        alert('Tidak ada token.');
       }
     });
-    this.setState({
-      name: this.props.route.params.data.name,
-      alamat: this.props.route.params.data.alamat,
-      email: this.props.route.params.data.email,
-      nomor_telpon: this.props.route.params.data.nomor_telpon,
-    });
+  }
+
+  getUser() {
+    console.log('sedang mengambil user..');
+    fetch('https://si--amanah.herokuapp.com/api/profile', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        this.setState({
+          user: responseJson.data,
+          name: responseJson.data.name,
+          alamat: responseJson.data.alamat,
+          email: responseJson.data.email,
+          nomor_telpon: responseJson.data.nomor_telpon,
+          image: responseJson.data.image,
+        });
+        console.log(this.state.user);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   editProfile() {
@@ -75,8 +95,9 @@ class ProfileEdit extends Component {
             console.log(response);
             if (response.status == 'Success') {
               console.log('upload succes', response);
+              this.setState({user: '', loading: false});
               ToastAndroid.show('Profil telah disunting', ToastAndroid.SHORT);
-              this.props.navigation.replace('BottomTab', {screen: 'Profile'});
+              this.getUser();
             } else {
               alert('Error');
               this.setState({loading: false});
@@ -84,7 +105,8 @@ class ProfileEdit extends Component {
           })
           .catch((error) => {
             this.setState({loading: false});
-            alert('Terjadi kesalahan. ' + error);
+            alert('Harap rubah foto.');
+            console.log(error);
           });
       } else {
         alert('Gambar harus dirubah');
@@ -130,7 +152,7 @@ class ProfileEdit extends Component {
 
   alert() {
     Alert.alert(
-      'Perhatian',
+      'Demi Keamanan',
       'Harap konfimasi password Anda.',
       [
         {
@@ -144,26 +166,16 @@ class ProfileEdit extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
-        {this.props.route.params.data.role == 2 ? (
-          <View style={{flex: 1}}>
-            <View style={styles.header}>
-              <Image
-                source={require('../assets/user-account-box.png')}
-                style={styles.headerIcon}
-              />
-              <Text style={styles.headerText}>Pengaturan Akun</Text>
-            </View>
-            <TopTabToko />
+        {this.state.user == '' ? (
+          <View style={styles.viewLoading}>
+            <LottieView
+              source={require('../../assets/8205-loading-animation.json')}
+              autoPlay={true}
+              style={{height: 120}}
+            />
           </View>
         ) : (
           <View>
-            <View style={styles.header}>
-              <Image
-                source={require('../assets/user-account-box.png')}
-                style={styles.headerIcon}
-              />
-              <Text style={styles.headerText}>Pengaturan Akun</Text>
-            </View>
             <ScrollView>
               <TouchableOpacity
                 style={styles.viewPP}
@@ -174,10 +186,7 @@ class ProfileEdit extends Component {
                     style={styles.pp}
                   />
                 ) : (
-                  <Image
-                    source={{uri: this.props.route.params.data.image}}
-                    style={styles.pp}
-                  />
+                  <Image source={{uri: this.state.image}} style={styles.pp} />
                 )}
               </TouchableOpacity>
               <View style={styles.input}>
@@ -220,43 +229,41 @@ class ProfileEdit extends Component {
                   style={styles.textInput}
                 />
               </View>
-              <View style={{marginBottom: 70}}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-evenly',
-                    marginVertical: 10,
-                  }}>
-                  <TouchableOpacity
-                    style={styles.touchAbort}
-                    onPress={() =>
-                      this.props.navigation.replace('BottomTab', {
-                        screen: 'Profile',
-                      })
-                    }>
-                    <Text style={styles.text}> Batal </Text>
-                  </TouchableOpacity>
-                  {this.state.loading ? (
-                    <View style={styles.touchEdit2}>
-                      <LottieView
-                        source={require('../assets/8205-loading-animation.json')}
-                        autoPlay={true}
-                      />
-                    </View>
-                  ) : (
-                    <TouchableOpacity
-                      style={styles.touchEdit}
-                      onPress={() => this.editProfile()}>
-                      <Text style={styles.text}> Edit Profil </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-evenly',
+                  marginVertical: 10,
+                }}>
                 <TouchableOpacity
-                  style={styles.touchLogInOut}
-                  onPress={() => this.logout()}>
-                  <Text style={styles.text}> Logout </Text>
+                  style={styles.touchAbort}
+                  onPress={() =>
+                    this.props.navigation.replace('BottomTab', {
+                      screen: 'Profile',
+                    })
+                  }>
+                  <Text style={styles.text}> Kembali </Text>
                 </TouchableOpacity>
+                {this.state.loading ? (
+                  <View style={styles.touchEdit2}>
+                    <LottieView
+                      source={require('../../assets/8205-loading-animation.json')}
+                      autoPlay={true}
+                    />
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.touchEdit}
+                    onPress={() => this.editProfile()}>
+                    <Text style={styles.text}> Edit Profil </Text>
+                  </TouchableOpacity>
+                )}
               </View>
+              <TouchableOpacity
+                style={styles.touchLogInOut}
+                onPress={() => this.logout()}>
+                <Text style={styles.text}> Logout </Text>
+              </TouchableOpacity>
             </ScrollView>
           </View>
         )}
@@ -363,6 +370,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
+  viewLoading: {
+    backgroundColor: 'white',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignSelf: 'center',
+    width: '95%',
+    margin: 10,
+    elevation: 2,
+  },
 });
-
-export default ProfileEdit;

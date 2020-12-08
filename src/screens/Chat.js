@@ -10,6 +10,7 @@ import {
   ImageBackground,
   ShadowPropTypesIOS,
   TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
 
 class Chat extends Component {
@@ -19,6 +20,7 @@ class Chat extends Component {
       token: '',
       user: [],
       data: '',
+      refresh: false,
     };
     AsyncStorage.getItem('token').then((value) => {
       if (value != null) {
@@ -62,10 +64,11 @@ class Chat extends Component {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        this.setState({data: responseJson.data});
+        this.setState({data: responseJson.data, refresh: false});
         console.log(this.state.data);
       })
       .catch((err) => {
+        this.setState({refresh: false});
         console.log('Terjadi kesalahan. ' + err);
       });
   }
@@ -106,7 +109,16 @@ class Chat extends Component {
             <Text style={styles.headerText}>Pesan</Text>
           </ImageBackground>
         </View>
-        <ScrollView>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refresh}
+              onRefresh={() => {
+                this.setState({refresh: true});
+                this.getAllUser();
+              }}
+            />
+          }>
           {this.state.data == '' ? (
             <View style={styles.viewLoading}>
               <LottieView

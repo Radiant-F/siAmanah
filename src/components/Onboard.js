@@ -8,9 +8,14 @@ class Onboard extends Component {
   constructor() {
     super();
     this.state = {
-      isFirst: 'true',
+      isFirst: 'a',
     };
   }
+
+  componentDidMount() {
+    AsyncStorage.setItem('first', this.state.isFirst);
+  }
+
   render() {
     return (
       <Onboarding

@@ -97,7 +97,7 @@ export default class CStatus extends Component {
           if (response.status == 'Success') {
             console.log('upload succes', response);
             this.alert();
-            this.setState({loading: false, data: ''});
+            this.setState({loading: false, data: null});
             this.getPayment();
             // this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
           } else if (response.msg == 'nominal kurang') {

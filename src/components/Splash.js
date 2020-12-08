@@ -5,18 +5,33 @@ import {View, Image, StyleSheet, ImageBackground} from 'react-native';
 class Splash extends Component {
   componentDidMount() {
     setTimeout(() => {
-      AsyncStorage.getItem('token')
+      AsyncStorage.getItem('first')
         .then((value) => {
           if (value !== null) {
-            console.log(value + '. Token tersedia. Menuju HomePage');
-            this.props.navigation.replace('BottomTab');
+            console.log(value, 'Bukan pertama kali. Memeriksa token...');
+            this.onboardCheck();
+            // this.props.navigation.replace('BottomTab');
           } else {
-            console.log('Tidak ada token. Menuju onboard.');
+            console.log('Pertama kali. Menuju onboard.');
             this.props.navigation.replace('Onboard');
           }
         })
         .catch((err) => console.log(err));
     }, 1000);
+  }
+
+  onboardCheck() {
+    AsyncStorage.getItem('token')
+      .then((value) => {
+        if (value !== null) {
+          console.log(value, '. Token tersedia.');
+          this.props.navigation.replace('BottomTab');
+        } else {
+          console.log('Tidak ada token.');
+          this.props.navigation.replace('Login');
+        }
+      })
+      .catch((err) => console.log(err));
   }
 
   render() {

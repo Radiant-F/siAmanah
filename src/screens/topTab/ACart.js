@@ -26,6 +26,7 @@ class Cart extends Component {
       loading: false,
       tujuan: '',
       refresh: false,
+      total: '',
     };
   }
 
@@ -64,11 +65,12 @@ class Cart extends Component {
           this.setState({
             loading: false,
             cart: responseJson.data,
+            total: responseJson.data[0].order.jumlah_harga,
           });
-          console.log('Keranjang: ' + this.state.cart);
+          console.log('Total: ', this.state.total);
         } else {
           this.setState({loading: false});
-          console.log('Keranjang: ' + this.state.cart);
+          console.log('Keranjang: ', this.state.cart);
         }
         this.setState({refresh: false});
       })
@@ -125,9 +127,8 @@ class Cart extends Component {
           if (response.status == 'Success') this.setState({loading: false});
           console.log(response);
           this.alert();
-          this.setState({cart: ''});
+          this.setState({loading: false, cart: ''});
           this.getItem();
-          // this.props.navigation.replace('BottomTab', {screen: 'Transaction'});
         })
         .catch((error) => {
           this.setState({loading: false});
@@ -135,11 +136,7 @@ class Cart extends Component {
         });
     } else {
       this.setState({loading: false});
-      ToastAndroid.show(
-        'Harap isi alamat tujuan.',
-        ToastAndroid.SHORT,
-        ToastAndroid.CENTER,
-      );
+      ToastAndroid.show('Harap isi alamat tujuan.', ToastAndroid.SHORT);
     }
   }
 
@@ -213,11 +210,31 @@ class Cart extends Component {
                   </View>
                 </View>
               ))}
-              <TouchableOpacity
-                style={style.confirm}
-                onPress={() => this.checkOut()}>
-                <Text style={style.textCheck}>Checkout!</Text>
-              </TouchableOpacity>
+              <View style={style.viewCheckout}>
+                <View style={style.viewTotal}>
+                  <Text>Total Harga :</Text>
+                  <Text style={{color: 'green', fontWeight: 'bold'}}>
+                    Rp.{this.toPrice(this.state.total)},-
+                  </Text>
+                </View>
+                {this.state.loading ? (
+                  <View style={style.confirm2}>
+                    <LottieView
+                      source={require('../../assets/8205-loading-animation.json')}
+                      autoPlay={true}
+                      style={{height: 55}}
+                    />
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={style.confirm}
+                    onPress={() => this.checkOut()}>
+                    <Text style={{fontWeight: 'bold', fontSize: 20}}>
+                      Checkout!
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </ScrollView>
           </View>
         )}
@@ -282,14 +299,42 @@ const style = StyleSheet.create({
     fontWeight: 'bold',
   },
   confirm: {
-    backgroundColor: '#5cf4ff',
-    width: 200,
+    backgroundColor: 'aqua',
+    padding: 8,
+    borderRadius: 5,
+    elevation: 2,
     height: 55,
     justifyContent: 'center',
-    borderRadius: 10,
+    width: 140,
+    alignItems: 'center',
+  },
+  confirm2: {
+    backgroundColor: 'white',
+    padding: 8,
+    borderRadius: 5,
+    elevation: 2,
+    height: 55,
+    justifyContent: 'center',
+    width: 140,
+    alignItems: 'center',
+  },
+  viewTotal: {
+    backgroundColor: '#ffaa00',
+    padding: 8,
+    borderRadius: 5,
+    elevation: 2,
+    height: 55,
+    justifyContent: 'center',
+  },
+  viewCheckout: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'center',
-    margin: 5,
-    elevation: 3,
+    justifyContent: 'space-around',
+    width: '90%',
+    borderRadius: 5,
+    paddingVertical: 5,
+    marginVertical: 5,
   },
   textCheck: {
     textAlign: 'center',

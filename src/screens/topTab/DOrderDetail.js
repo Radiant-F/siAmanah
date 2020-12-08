@@ -121,18 +121,28 @@ class DetailOrder extends Component {
     );
   }
 
-  alert2() {
+  confirm(id) {
     Alert.alert(
-      'Mantap!',
-      'Pesanan telah sampai ke tangan anda.',
+      'Pesanan Sudah Tiba?',
+      'Pastikan pesanan sudah ada ditangan Anda.',
       [
         {
+          text: 'Batal',
+        },
+        {
           text: 'Ok',
-          onPress: () => console.log('Cancel Pressed'),
+          onPress: () => this.confirmProduct(id),
         },
       ],
-      {cancelable: false},
     );
+  }
+
+  alert2() {
+    Alert.alert('Mantap!', 'Pesanan telah sampai ke tangan anda.', [
+      {
+        text: 'Ok',
+      },
+    ]);
   }
 
   render() {
@@ -182,19 +192,11 @@ class DetailOrder extends Component {
                     <View style={styles.button}>
                       <Button
                         title="Konfirmasi pesanan"
-                        onPress={() => this.confirmProduct(value.id)}
+                        onPress={() => this.confirm(value.id)}
                       />
                     </View>
                   ) : (
-                    <View
-                      style={{
-                        width: '100%',
-                        backgroundColor: '#00cc1f',
-                        paddingVertical: 9,
-                        elevation: 3,
-                        borderRadius: 1,
-                        marginVertical: 5,
-                      }}>
+                    <View style={styles.buttonConfirmed}>
                       <Text style={{textAlign: 'center', color: 'white'}}>
                         Pesanan sudah Anda terima!
                       </Text>
@@ -275,6 +277,15 @@ const styles = StyleSheet.create({
   },
   button: {
     marginVertical: 10,
+  },
+  buttonConfirmed: {
+    width: '100%',
+    backgroundColor: '#00cc1f',
+    paddingVertical: 9,
+    elevation: 3,
+    borderRadius: 1,
+    marginVertical: 7,
+    height: 35,
   },
 });
 

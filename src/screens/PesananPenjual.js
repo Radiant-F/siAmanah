@@ -54,7 +54,7 @@ export default class PesananPenjual extends Component {
       .then((response) => response.json())
       .then((responseJson) => {
         let semuaData = responseJson.data;
-        semuaData.sort((a, b) => b.id - a.id);
+        semuaData.sort((a, b) => a.id - b.id);
         this.setState({
           dataSource: semuaData,
           idConfirm: responseJson.data[0].id,
@@ -168,7 +168,7 @@ export default class PesananPenjual extends Component {
                             Rp.{this.toPrice(value.jumlah_harga)},-
                           </Text>
                         </Text>
-                        {value.status != 2 ? (
+                        {value.status == null ? (
                           <View>
                             <Text>
                               Status:{' '}
@@ -179,12 +179,21 @@ export default class PesananPenjual extends Component {
                           </View>
                         ) : (
                           <View>
-                            <Text>
-                              Status:{' '}
-                              <Text style={{color: 'green'}}>
-                                dikonfirmasi.
+                            {value.status == 2 ? (
+                              <Text>
+                                Status:{' '}
+                                <Text style={{color: 'green'}}>
+                                  Dikonfirmasi.
+                                </Text>
                               </Text>
-                            </Text>
+                            ) : (
+                              <Text>
+                                Status:{' '}
+                                <Text style={{color: 'green'}}>
+                                  Diterima Penjual.
+                                </Text>
+                              </Text>
+                            )}
                           </View>
                         )}
                       </View>
@@ -199,15 +208,25 @@ export default class PesananPenjual extends Component {
                           })
                         }
                       />
-                      {value.status != 2 ? (
+                      {value.status == null ? (
                         <Button
                           title="Konfirmasi"
                           onPress={() => this.confirmOrder(value.id)}
                         />
                       ) : (
-                        <View style={styles.viewConfirmed}>
-                          <Text style={{color: 'white'}}>Dikonfirmasi</Text>
-                        </View>
+                        <>
+                          {value.status == 2 ? (
+                            <View style={styles.viewConfirmed}>
+                              <Text style={{color: 'white'}}>Dikonfirmasi</Text>
+                            </View>
+                          ) : (
+                            <View style={styles.viewConfirmed}>
+                              <Text style={{color: 'white'}}>
+                                Diterima Penjual
+                              </Text>
+                            </View>
+                          )}
+                        </>
                       )}
                     </View>
                   </View>
@@ -322,7 +341,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'grey',
     paddingHorizontal: 10,
     borderRadius: 2,
-    elevation: 2,
+    elevation: 5,
     justifyContent: 'center',
   },
 });

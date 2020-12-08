@@ -12,7 +12,10 @@ import {
   ShadowPropTypesIOS,
   TouchableOpacity,
   TextInput,
+  TouchableWithoutFeedback,
+  Alert,
 } from 'react-native';
+import {TouchableNativeFeedback} from 'react-native-gesture-handler';
 
 class ChatScreen extends Component {
   constructor() {
@@ -137,6 +140,45 @@ class ChatScreen extends Component {
     }
   }
 
+  deletePesan(id) {
+    this.setState({loading: true});
+    fetch(`https://si--amanah.herokuapp.com/api/message/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.state.token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((json) => {
+        console.log(json);
+        const {status} = json;
+        if (status == 'Success') {
+          this.getMessage();
+          ToastAndroid.show('Pesan dihapus.', ToastAndroid.SHORT);
+          this.setState({loading: false});
+        }
+      })
+      .catch((err) => log(err), this.setState({loading: false}));
+  }
+
+  confirmDelete(id) {
+    Alert.alert(
+      '',
+      'Hapus Pesan?',
+      [
+        {
+          text: 'Batal',
+        },
+        {
+          text: 'Hapus',
+          onPress: () => this.deletePesan(id),
+        },
+      ],
+      {cancelable: false},
+    );
+  }
+
   render() {
     return (
       <View style={{flex: 1}}>
@@ -174,10 +216,12 @@ class ChatScreen extends Component {
                       <Text style={styles.textTime2}>{value.created_at}</Text>
                     </View>
                   ) : (
-                    <View style={styles.viewMessageRight}>
+                    <TouchableOpacity
+                      onLongPress={() => this.confirmDelete(value.id)}
+                      style={styles.viewMessageRight}>
                       <Text style={styles.textMessage}>{value.message}</Text>
                       <Text style={styles.textTime}>{value.created_at}</Text>
-                    </View>
+                    </TouchableOpacity>
                   )}
                 </View>
               ))}
