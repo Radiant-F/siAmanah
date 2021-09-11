@@ -105,7 +105,6 @@ export default class editProfile extends Component {
           })
           .catch((error) => {
             this.setState({loading: false});
-            alert('Harap rubah foto.');
             console.log(error);
           });
       } else {
